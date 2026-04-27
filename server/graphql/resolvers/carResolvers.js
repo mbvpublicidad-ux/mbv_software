@@ -1,8 +1,14 @@
 import Car from "../../models/Car.js";
 import User from "../../models/User.js";
 import Expense from "../../models/Expense.js";
+import CompanyBalance from "../../models/CompanyBalance.js";
 
-import { deleteImages } from "../../config/cloudinary.js";
+import {
+	deleteImages,
+	deleteImage,
+	extractPublicId,
+} from "../../config/cloudinary.js";
+
 import { calculateCarProfit } from "../../utils/profitCalculator.js";
 
 const carResolvers = {
@@ -348,9 +354,6 @@ const carResolvers = {
 				.populate("assignedClient")
 				.populate("expenses");
 
-			// Update CompanyBalance if needed
-			const { default: CompanyBalance } =
-				await import("../../models/CompanyBalance.js");
 			const balance = await CompanyBalance.findOne();
 			if (balance) {
 				balance.currentBalance += finalSalePriceCRC;
@@ -403,8 +406,6 @@ const carResolvers = {
 			if (!car) throw new Error("Car not found");
 
 			// Delete from Cloudinary
-			const { deleteImage } = await import("../../config/cloudinary.js");
-			const { extractPublicId } = await import("../../config/cloudinary.js");
 			const publicId = extractPublicId(imageUrl);
 			if (publicId) {
 				await deleteImage(publicId);

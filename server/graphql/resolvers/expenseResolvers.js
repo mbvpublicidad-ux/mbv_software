@@ -1,5 +1,7 @@
+import CompanyBalance from "../../models/CompanyBalance.js";
 import Expense from "../../models/Expense.js";
 import Car from "../../models/Car.js";
+
 import { getCurrentExchangeRate } from "../../utils/currencyConverter.js";
 
 const expenseResolvers = {
@@ -86,8 +88,6 @@ const expenseResolvers = {
 
 			// Update CompanyBalance if it's a non-JC expense
 			if (!input.isFromJuanCarlos) {
-				const { default: CompanyBalance } =
-					await import("../../models/CompanyBalance.js");
 				const balance = await CompanyBalance.findOne();
 				if (balance) {
 					if (input.currency === "CRC") {
