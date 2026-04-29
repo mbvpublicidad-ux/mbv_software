@@ -1,13 +1,20 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
+import { useMutation } from "@apollo/client/react";
+
 import {
 	BsPlus,
 	BsPencil,
 	BsTrash,
 	BsSpeedometer2,
 	BsCalendar,
+	BsCheckCircle,
 } from "react-icons/bs";
+
 import { useCar } from "../../context/CarContext";
+import { useToast } from "../../context/ToastContext";
+
+import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
 import Pagination from "../../components/common/Pagination";
@@ -17,7 +24,7 @@ import { LoadingOverlay } from "../../components/ui/LoadingUi";
 import EmptyState from "../../components/ui/EmptyState";
 import CarForm from "../../components/cars/CarForm";
 import Select from "../../components/ui/Select";
-import { useToast } from "../../context/ToastContext";
+
 import {
 	formatCRC,
 	formatMileage,
@@ -27,10 +34,13 @@ import {
 	getAvailabilityColor,
 	getDetailsTranslation,
 } from "../../utils/formatters";
+
 import {
 	LOGISTIC_STATUS_OPTIONS,
 	AVAILABILITY_OPTIONS,
 } from "../../utils/constants";
+
+import { MARK_CAR_AS_SOLD } from "../../graphql/mutations/carMutations";
 
 const CarsManagementPage = () => {
 	const {
@@ -46,11 +56,21 @@ const CarsManagementPage = () => {
 		refetchCars,
 	} = useCar();
 
+	const [markCarAsSold] = useMutation(MARK_CAR_AS_SOLD);
+
 	const { toast } = useToast();
 	const [selectedCars, setSelectedCars] = useState([]);
 	const [deleteConfirm, setDeleteConfirm] = useState(null);
 	const [isFormOpen, setIsFormOpen] = useState(false);
 	const [editingCar, setEditingCar] = useState(null);
+
+	const [sellModal, setSellModal] = useState(null);
+	const [sellForm, setSellForm] = useState({
+		finalSalePriceCRC: "",
+		saleDate: new Date().toISOString().split("T")[0],
+		buyerName: "",
+	});
+	const [markingSold, setMarkingSold] = useState(false);
 
 	const handleDelete = async (id) => {
 		try {
@@ -75,6 +95,36 @@ const CarsManagementPage = () => {
 		setSelectedCars([]);
 		toast.success("Vehículos actualizados");
 		refetchCars();
+	};
+
+	const handleMarkAsSold = async (e) => {
+		e.preventDefault();
+		if (!sellForm.finalSalePriceCRC || Number(sellForm.finalSalePriceCRC) <= 0)
+			return;
+		if (!sellForm.saleDate) return;
+
+		setMarkingSold(true);
+		try {
+			await markCarAsSold({
+				variables: {
+					id: sellModal,
+					finalSalePriceCRC: Number(sellForm.finalSalePriceCRC),
+					saleDate: sellForm.saleDate,
+					buyerName: sellForm.buyerName || undefined,
+				},
+			});
+			toast.success("Auto marcado como vendido");
+			setSellModal(null);
+			setSellForm({
+				finalSalePriceCRC: "",
+				saleDate: new Date().toISOString().split("T")[0],
+				buyerName: "",
+			});
+			refetchCars();
+		} catch (error) {
+			toast.error(error.message || "Error al marcar como vendido");
+		}
+		setMarkingSold(false);
 	};
 
 	if (carsLoading)
@@ -172,6 +222,7 @@ const CarsManagementPage = () => {
 										<h3 className="font-semibold text-first text-sm line-clamp-1">
 											{car.brand?.name} {car.carModel?.name} {car.year}{" "}
 											{car.color.toUpperCase()}
+											{console.log(car.availability)}
 										</h3>
 										<p className="text-xs text-first/40 mt-0.5">{car.vin}</p>
 									</Link>
@@ -188,7 +239,7 @@ const CarsManagementPage = () => {
 											{formatDate(car.purchaseDate)}
 										</div>
 
-										<div className="flex items-center gap-1.5 flex-wrap">
+										<div className="flex items-center justify-center gap-1.5 flex-wrap">
 											<Badge
 												size="sm"
 												className={getLogisticStatusColor(car.logisticStatus)}
@@ -215,6 +266,25 @@ const CarsManagementPage = () => {
 
 									{/* Actions */}
 									<div className="px-4 pb-3 flex gap-1 justify-end border-t border-first/5 pt-2">
+										{car.availability !== "Sold" && (
+											<Button
+												iconOnly
+												variant="ghost"
+												size="sm"
+												className="text-success"
+												icon={<BsCheckCircle className="w-3.5 h-3.5" />}
+												onClick={() => {
+													setSellModal(car._id);
+													setSellForm({
+														finalSalePriceCRC:
+															car.publishedPriceCRC?.toString() || "",
+														saleDate: new Date().toISOString().split("T")[0],
+														buyerName: "",
+													});
+												}}
+												title="Marcar como vendido"
+											/>
+										)}
 										<Button
 											iconOnly
 											variant="ghost"
@@ -279,6 +349,59 @@ const CarsManagementPage = () => {
 						}}
 						onSuccess={() => refetchCars()}
 					/>
+				</Modal>
+
+				{/* Modal Marcar como Vendido */}
+				<Modal
+					isOpen={!!sellModal}
+					onClose={() => setSellModal(null)}
+					title="Marcar como Vendido"
+					size="sm"
+				>
+					<form onSubmit={handleMarkAsSold} className="space-y-4">
+						<Input
+							label="Precio final de venta (CRC)"
+							type="number"
+							required
+							min={0}
+							value={sellForm.finalSalePriceCRC}
+							onChange={(e) =>
+								setSellForm((p) => ({
+									...p,
+									finalSalePriceCRC: e.target.value,
+								}))
+							}
+						/>
+						<Input
+							label="Fecha de venta"
+							type="date"
+							required
+							value={sellForm.saleDate}
+							onChange={(e) =>
+								setSellForm((p) => ({ ...p, saleDate: e.target.value }))
+							}
+						/>
+						<Input
+							label="Comprador (opcional)"
+							value={sellForm.buyerName}
+							onChange={(e) =>
+								setSellForm((p) => ({ ...p, buyerName: e.target.value }))
+							}
+							placeholder="Nombre del comprador"
+						/>
+						<div className="flex justify-end gap-2 pt-2">
+							<Button
+								variant="ghost"
+								type="button"
+								onClick={() => setSellModal(null)}
+							>
+								Cancelar
+							</Button>
+							<Button type="submit" loading={markingSold}>
+								Marcar como vendido
+							</Button>
+						</div>
+					</form>
 				</Modal>
 
 				<ConfirmDialog

@@ -237,24 +237,6 @@ const CarForm = ({ car, onClose, onSuccess }) => {
 		if (!formData.engine.trim()) newErrors.engine = "Requerido";
 		if (!formData.color.trim()) newErrors.color = "Requerido";
 
-		if (!isEditing) {
-			if (
-				!mandatoryExpenses.shippingLine.amount ||
-				Number(mandatoryExpenses.shippingLine.amount) <= 0
-			)
-				newErrors.shippingLineAmount = "Requerido";
-			if (
-				!mandatoryExpenses.inspection.amount ||
-				Number(mandatoryExpenses.inspection.amount) <= 0
-			)
-				newErrors.inspectionAmount = "Requerido";
-			if (
-				!mandatoryExpenses.towTruck.amount ||
-				Number(mandatoryExpenses.towTruck.amount) <= 0
-			)
-				newErrors.towTruckAmount = "Requerido";
-		}
-
 		setErrors(newErrors);
 		return Object.keys(newErrors).length === 0;
 	};
@@ -681,7 +663,7 @@ const CarForm = ({ car, onClose, onSuccess }) => {
 			{!isEditing && (
 				<div className="space-y-4">
 					<h3 className="text-base font-semibold text-first border-b border-first/10 pb-2">
-						Gastos Obligatorios
+						Gastos del Auto
 					</h3>
 
 					{/* Naviera */}
@@ -818,7 +800,7 @@ const CarForm = ({ car, onClose, onSuccess }) => {
 				<div className="space-y-4">
 					<div className="flex items-center justify-between border-b border-first/10 pb-2">
 						<h3 className="text-base font-semibold text-first">
-							Gastos Opcionales
+							Mas Gastos
 						</h3>
 						<Button
 							type="button"

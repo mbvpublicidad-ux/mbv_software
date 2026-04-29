@@ -11,7 +11,7 @@ const Footer = () => {
 	const socialLinks = [
 		{
 			icon: <BsInstagram className="w-4 h-4" />,
-			url: import.meta.env.VITE_INSTAGRAM_URL || "#",
+			url: import.meta.env.VITE_INSTAGRAM || "#",
 			label: "Instagram",
 		},
 		{
@@ -23,12 +23,12 @@ const Footer = () => {
 		},
 		{
 			icon: <BsFacebook className="w-4 h-4" />,
-			url: import.meta.env.VITE_FACEBOOK_URL || "#",
+			url: import.meta.env.VITE_FACEBOOK || "#",
 			label: "Facebook",
 		},
 		{
 			icon: <BsTiktok className="w-4 h-4" />,
-			url: import.meta.env.VITE_TIKTOK_URL || "#",
+			url: import.meta.env.VITE_TIKTOK || "#",
 			label: "TikTok",
 		},
 	];
@@ -46,11 +46,7 @@ const Footer = () => {
 				<div className="py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
 					{/* Brand */}
 					<div className="space-y-4">
-						<img
-							src={logoHorizontal}
-							alt="MBV Logo"
-							className="h-12 w-auto"
-						/>
+						<img src={logoHorizontal} alt="MBV Logo" className="h-12 w-auto" />
 						<p className="text-first/70 text-sm leading-relaxed">
 							Importaciones MBV - Vehículos importados desde Florida, USA.
 							Calidad y confianza en cada auto que traemos para ti.

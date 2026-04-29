@@ -70,8 +70,8 @@ const MyCarsTimeline = ({ logisticStatus }) => {
 							<div
 								className={`w-8 h-8 rounded-full flex items-center justify-center transition-all duration-300 ${
 									isCompleted
-										? "bg-second text-main"
-										: "bg-first/5 text-first/20"
+										? "bg-success text-main"
+										: "bg-second/5 text-first/20"
 								} ${isCurrent ? "ring-2 ring-second/30 ring-offset-2 ring-offset-main" : ""}`}
 							>
 								{isCompleted ? (
@@ -82,12 +82,12 @@ const MyCarsTimeline = ({ logisticStatus }) => {
 							</div>
 							<p
 								className={`text-xs font-medium mt-2 transition-colors duration-300 ${
-									isCompleted ? "text-first" : "text-first/30"
+									isCompleted ? "text-success" : "text-first/30"
 								}`}
 							>
 								{step.label}
 							</p>
-							<p className="text-[10px] text-first/30 hidden sm:block">
+							<p className="text-[10px] text-first/50 hidden sm:block">
 								{step.description}
 							</p>
 						</div>

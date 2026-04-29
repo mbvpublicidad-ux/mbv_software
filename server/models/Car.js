@@ -128,7 +128,7 @@ const carSchema = new mongoose.Schema({
 	drivetrain: {
 		type: String,
 		required: [true, "La tracción es requerida"],
-		enum: ["Front", "Rear", "4x4"],
+		enum: ["4x2", "Front", "Rear", "4x4"],
 	},
 	color: {
 		type: String,

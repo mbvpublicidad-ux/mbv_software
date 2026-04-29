@@ -42,17 +42,6 @@ const CarCard = ({ car }) => {
 						</div>
 					)}
 
-					{/* Status Badge */}
-					<div className="absolute top-3 left-3">
-						<Badge
-							variant="neutral"
-							size="sm"
-							className={`${getLogisticStatusColor(car.logisticStatus)}`}
-						>
-							{getLogisticStatusText(car.logisticStatus)}
-						</Badge>
-					</div>
-
 					{/* Image Count */}
 					{car.images?.length > 1 && (
 						<div className="absolute top-3 right-3 bg-black/60 text-white text-xs px-2 py-1 rounded-full">
@@ -65,18 +54,26 @@ const CarCard = ({ car }) => {
 			{/* Content */}
 			<div className="p-4">
 				{/* Title */}
-				<Link to={`/car/${car._id}`}>
-					<h3 className="text-lg font-semibold text-first group-hover:text-second transition-colors line-clamp-1">
-						{car.brand?.name} {car.carModel?.name}
-					</h3>
-					<p className="text-sm text-first/40 mb-3">{car.year}</p>
-				</Link>
+				<div className="flex flex-col gap-2 items-center">
+					<Link to={`/car/${car._id}`}>
+						<h3 className="text-lg font-semibold text-first group-hover:text-second transition-colors line-clamp-1">
+							{car.brand?.name} {car.carModel?.name} {car.year}
+						</h3>
+					</Link>
 
-				{/* Price */}
-				<div className="mb-4">
-					<p className="text-2xl font-bold text-second">
-						{formatCRC(car.publishedPriceCRC)}
-					</p>
+					<Badge
+						size="sm"
+						className={`${getLogisticStatusColor(car.logisticStatus)}`}
+					>
+						{getLogisticStatusText(car.logisticStatus)}
+					</Badge>
+
+					{/* Price */}
+					<div className="mb-4">
+						<p className="text-2xl font-bold text-first">
+							{formatCRC(car.publishedPriceCRC)}
+						</p>
+					</div>
 				</div>
 
 				{/* Specs */}
@@ -95,7 +92,9 @@ const CarCard = ({ car }) => {
 					</div>
 					<div className="flex flex-col items-center p-2 bg-first/5 rounded-lg">
 						<BsFuelPump className="w-4 h-4 text-first/40 mb-1" />
-						{getDetailsTranslation("fuelType", car.fuelType)}
+						<span className="text-xs text-first/60">
+							{getDetailsTranslation("fuelType", car.fuelType)}
+						</span>
 					</div>
 				</div>
 
@@ -113,13 +112,12 @@ const CarCard = ({ car }) => {
 						</Button>
 					)}
 					<Button
-						variant="ghost"
+						variant="primary"
 						size="sm"
-						iconOnly={isAdmin}
 						onClick={() => shareVehicle(car)}
 						aria-label="Compartir"
 					>
-						{!isAdmin && "Compartir"}
+						Compartir
 					</Button>
 					{isAdmin && (
 						<Link to={`/car/${car._id}`} className="flex-1">

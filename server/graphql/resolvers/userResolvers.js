@@ -30,7 +30,10 @@ const userResolvers = {
 			if (!user || !["superadmin", "admin"].includes(user.role)) {
 				throw new Error("Not authorized");
 			}
-			return User.find({ role: "client" }).populate("commissionedCars");
+			return User.find({ role: "client" }).populate({
+				path: "commissionedCars",
+				populate: [{ path: "brand" }, { path: "carModel" }],
+			});
 		},
 	},
 
@@ -234,7 +237,10 @@ const userResolvers = {
 				await client.save();
 			}
 
-			return User.findById(userId).populate("commissionedCars");
+			return User.findById(userId).populate({
+				path: "commissionedCars",
+				populate: [{ path: "brand" }, { path: "carModel" }],
+			});
 		},
 
 		removeCarFromClient: async (_, { userId, carId }, { user }) => {
@@ -259,6 +265,12 @@ const userResolvers = {
 			await client.save();
 
 			return User.findById(userId).populate("commissionedCars");
+		},
+	},
+
+	User: {
+		registrationDate: (user) => {
+			return user.registrationDate?.toISOString?.() ?? null;
 		},
 	},
 };

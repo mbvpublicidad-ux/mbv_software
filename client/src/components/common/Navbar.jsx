@@ -2,7 +2,13 @@ import { useState, useEffect } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
 
 import { BsList, BsX, BsInstagram, BsFacebook, BsTiktok } from "react-icons/bs";
-import { FaWhatsapp } from "react-icons/fa";
+import {
+	FaCarSide,
+	FaChartArea,
+	FaSignOutAlt,
+	FaUser,
+	FaWhatsapp,
+} from "react-icons/fa";
 
 import { useTheme } from "../../context/ThemeContext";
 import { useAuth } from "../../context/AuthContext";
@@ -59,17 +65,17 @@ const Navbar = () => {
 	const authLinks = isAuthenticated
 		? [
 				...(user?.role === "admin" || user?.role === "superadmin"
-					? [{ to: "/admin/dashboard", label: "Panel Admin" }]
+					? [{ to: "/admin/dashboard", icon: <FaChartArea /> }]
 					: []),
-				...(user?.commissionedCars?.length > 0
-					? [{ to: "/my-cars", label: "Mis Autos" }]
+				...(user?.role === "client"
+					? [{ to: "/my-cars", icon: <FaCarSide /> }]
 					: []),
-				{ to: "/my-account", label: "Mi Cuenta" },
+				{ to: "/my-account", icon: <FaUser /> },
 			]
 		: [];
 
 	const linkClass = ({ isActive }) =>
-		`bg-first rounded-full shadow-lg px-2 py-1 text-sm font-medium transition-colors duration-200 hover:bg-second hover:text-first ${
+		`bg-first rounded-full shadow-lg py-1 px-2 text-sm font-medium transition-colors duration-200 hover:bg-second hover:text-first ${
 			isActive ? "bg-second  text-first" : "text-main"
 		}`;
 
@@ -181,13 +187,22 @@ const Navbar = () => {
 						{isAuthenticated ? (
 							<>
 								{authLinks.map((link) => (
-									<NavLink key={link.to} to={link.to} className={linkClass}>
-										{link.label}
+									<NavLink
+										key={link.to}
+										to={link.to}
+										className="bg-first text-main rounded-full p-2 transition-colors duration-200 hover:bg-transparent hover:text-first"
+									>
+										{link.icon}
 									</NavLink>
 								))}
-								<Button variant="ghost" size="sm" onClick={handleLogout}>
-									Cerrar sesión
-								</Button>
+								<Button
+									variant="danger"
+									iconOnly
+									icon={<FaSignOutAlt />}
+									size="sm"
+									rounded
+									onClick={handleLogout}
+								/>
 							</>
 						) : (
 							<NavLink to="/auth">
@@ -261,7 +276,7 @@ const Navbar = () => {
 										onClick={closeMenu}
 										className="block py-2 text-first/70 hover:text-second transition-colors"
 									>
-										{link.label}
+										{link.icon}
 									</NavLink>
 								))}
 								<button

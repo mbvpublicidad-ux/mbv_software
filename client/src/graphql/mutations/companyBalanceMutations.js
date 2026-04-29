@@ -10,3 +10,14 @@ export const UPDATE_INITIAL_AMOUNT = gql`
 		}
 	}
 `;
+
+export const RECALCULATE_BALANCE = gql`
+	mutation RecalculateBalance {
+		recalculateBalance {
+			_id
+			initialAmount
+			currentBalance
+			lastUpdated
+		}
+	}
+`;

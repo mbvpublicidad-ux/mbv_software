@@ -24,12 +24,13 @@ import {
 	BsCarFront,
 	BsX,
 } from "react-icons/bs";
+import { FaBarcode } from "react-icons/fa";
 import { formatDate } from "../../utils/formatters";
 
 const ClientsManagementPage = () => {
 	const { toast } = useToast();
 	const { data: clientsData, loading, refetch } = useQuery(GET_CLIENTS);
-	const { data: carsData } = useQuery(GET_CARS, {
+	const { data: carsData, refetch: refetchCars } = useQuery(GET_CARS, {
 		variables: { page: 1, limit: 1000 },
 	});
 
@@ -183,11 +184,18 @@ const ClientsManagementPage = () => {
 													key={car._id}
 													className="flex items-center justify-between bg-first/5 rounded-lg p-2"
 												>
-													<div className="flex items-center gap-2">
-														<BsCarFront className="w-3.5 h-3.5 text-first/30" />
-														<span className="text-sm text-first/70">
-															{car.brand?.name} {car.carModel?.name} {car.year}
-														</span>
+													<div className="flex flex-col gap-2">
+														<div className="flex items-center gap-2">
+															<BsCarFront className="w-3.5 h-3.5 text-first" />
+															<span className="text-sm text-first/70">
+																{car.brand?.name} {car.carModel?.name}{" "}
+																{car.year}
+															</span>
+														</div>
+														<div className="flex items-center gap-2">
+															<FaBarcode className="w-3.5 h-3.5 text-first" />
+															<span className="text-first/70">{car.vin}</span>
+														</div>
 													</div>
 													<Button
 														iconOnly
@@ -208,7 +216,10 @@ const ClientsManagementPage = () => {
 									size="sm"
 									fullWidth
 									className="mt-4"
-									onClick={() => setAssigningCar(client._id)}
+									onClick={() => {
+										refetchCars();
+										setAssigningCar(client._id);
+									}}
 								>
 									Asignar auto
 								</Button>
@@ -264,7 +275,7 @@ const ClientsManagementPage = () => {
 								<button
 									key={car._id}
 									onClick={() => handleAssignCar(car._id)}
-									className="w-full text-left p-3 rounded-xl bg-first/5 hover:bg-first/10 transition-colors"
+									className="w-full cursor-pointer text-left p-3 rounded-xl bg-first/5 hover:bg-first/10 transition-colors"
 								>
 									<p className="font-medium text-first">
 										{car.brand?.name} {car.carModel?.name} {car.year}

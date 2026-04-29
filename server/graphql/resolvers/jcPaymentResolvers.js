@@ -27,7 +27,10 @@ const jcPaymentResolvers = {
 			}
 
 			let paymentsQuery = JCPayment.find(query)
-				.populate("associatedCars")
+				.populate({
+					path: "associatedCars",
+					populate: [{ path: "brand" }, { path: "carModel" }],
+				})
 				.populate("createdBy")
 				.sort({ actualPaymentDate: -1 });
 
@@ -44,7 +47,10 @@ const jcPaymentResolvers = {
 			}
 
 			return JCPayment.findById(id)
-				.populate("associatedCars")
+				.populate({
+					path: "associatedCars",
+					populate: [{ path: "brand" }, { path: "carModel" }],
+				})
 				.populate("createdBy")
 				.populate("updatedBy");
 		},
@@ -62,7 +68,10 @@ const jcPaymentResolvers = {
 
 			// Get all payments made to JC
 			const payments = await JCPayment.find({})
-				.populate("associatedCars")
+				.populate({
+					path: "associatedCars",
+					populate: [{ path: "brand" }, { path: "carModel" }],
+				})
 				.populate("createdBy")
 				.sort({ actualPaymentDate: -1 });
 
@@ -103,8 +112,12 @@ const jcPaymentResolvers = {
 			}
 
 			return JCPayment.findById(payment._id)
-				.populate("associatedCars")
-				.populate("createdBy");
+				.populate({
+					path: "associatedCars",
+					populate: [{ path: "brand" }, { path: "carModel" }],
+				})
+				.populate("createdBy")
+				.populate("updatedBy");
 		},
 
 		updateJCPayment: async (_, { id, input }, { user }) => {
@@ -133,7 +146,10 @@ const jcPaymentResolvers = {
 				},
 				{ new: true, runValidators: true },
 			)
-				.populate("associatedCars")
+				.populate({
+					path: "associatedCars",
+					populate: [{ path: "brand" }, { path: "carModel" }],
+				})
 				.populate("createdBy")
 				.populate("updatedBy");
 
@@ -152,9 +168,25 @@ const jcPaymentResolvers = {
 				throw new Error("This payment cannot be deleted");
 			}
 
+			// Reembolsar al balance
+			const balance = await CompanyBalance.findOne();
+			if (balance) {
+				const rate = await getCurrentExchangeRate();
+				balance.currentBalance += payment.amount * rate;
+				balance.lastUpdated = new Date();
+				balance.updatedBy = user._id;
+				await balance.save();
+			}
+
 			await JCPayment.findByIdAndDelete(id);
 			return true;
 		},
+	},
+	JCPayment: {
+		actualPaymentDate: (payment) =>
+			payment.actualPaymentDate?.toISOString?.() ?? null,
+		registrationDate: (payment) =>
+			payment.registrationDate?.toISOString?.() ?? null,
 	},
 };
 

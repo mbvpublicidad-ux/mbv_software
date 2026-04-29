@@ -15,6 +15,7 @@ const companyBalanceDefs = gql`
 
 	type Mutation {
 		updateInitialAmount(amount: Float!): CompanyBalance!
+		recalculateBalance: CompanyBalance!
 	}
 `;
 

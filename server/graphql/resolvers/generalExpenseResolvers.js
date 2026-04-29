@@ -87,6 +87,23 @@ const generalExpenseResolvers = {
 				throw new Error("Not authorized");
 			}
 
+			const expense = await GeneralExpense.findById(id);
+			if (!expense) throw new Error("Expense not found");
+
+			// Reembolsar al balance
+			const balance = await CompanyBalance.findOne();
+			if (balance) {
+				if (expense.currency === "CRC") {
+					balance.currentBalance += expense.amount;
+				} else {
+					const rate = await getCurrentExchangeRate();
+					balance.currentBalance += expense.amount * rate;
+				}
+				balance.lastUpdated = new Date();
+				balance.updatedBy = user._id;
+				await balance.save();
+			}
+
 			await GeneralExpense.findByIdAndDelete(id);
 			return true;
 		},

@@ -22,7 +22,10 @@ const clientPaymentResolvers = {
 
 			let paymentsQuery = ClientPayment.find(query)
 				.populate("client")
-				.populate("car")
+				.populate({
+					path: "car",
+					populate: [{ path: "brand" }, { path: "carModel" }],
+				})
 				.populate("createdBy")
 				.sort({ paymentDate: -1 });
 
@@ -74,8 +77,12 @@ const clientPaymentResolvers = {
 				createdBy: user._id,
 			});
 
+			const allPayments = await ClientPayment.find({ car: input.car });
+			const totalPaid = allPayments.reduce((sum, p) => sum + p.amount, 0);
+
 			// Update CompanyBalance - increase balance (client payment received)
 			const balance = await CompanyBalance.findOne();
+
 			if (balance) {
 				balance.currentBalance += input.amount;
 				balance.lastUpdated = new Date();
@@ -83,9 +90,19 @@ const clientPaymentResolvers = {
 				await balance.save();
 			}
 
+			if (totalPaid >= car.publishedPriceCRC && car.availability !== "Sold") {
+				car.availability = "Sold";
+				car.finalSalePriceCRC = totalPaid;
+				car.saleDate = new Date().toISOString();
+				await car.save();
+			}
+
 			return ClientPayment.findById(payment._id)
 				.populate("client")
-				.populate("car")
+				.populate({
+					path: "car",
+					populate: [{ path: "brand" }, { path: "carModel" }],
+				})
 				.populate("createdBy");
 		},
 
@@ -116,8 +133,36 @@ const clientPaymentResolvers = {
 				throw new Error("Not authorized");
 			}
 
+			const payment = await ClientPayment.findById(id);
+			if (!payment) throw new Error("Payment not found");
+
 			await ClientPayment.findByIdAndDelete(id);
+
+			// Descontar del balance
+			const balance = await CompanyBalance.findOne();
+			if (balance) {
+				balance.currentBalance -= payment.amount;
+				balance.lastUpdated = new Date();
+				balance.updatedBy = user._id;
+				await balance.save();
+			}
+
 			return true;
+		},
+	},
+
+	ClientPayment: {
+		paymentDate: (clientPayment) =>
+			clientPayment.paymentDate?.toISOString?.() || null,
+		pendingBalance: async (payment) => {
+			const car = await Car.findById(payment.car);
+			if (!car) return 0;
+
+			// Sumar todos los pagos de este auto
+			const allPayments = await ClientPayment.find({ car: payment.car });
+			const totalPaid = allPayments.reduce((sum, p) => sum + p.amount, 0);
+
+			return Math.max(0, car.publishedPriceCRC - totalPaid);
 		},
 	},
 };

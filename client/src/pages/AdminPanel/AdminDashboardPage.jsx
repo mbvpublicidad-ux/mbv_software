@@ -21,6 +21,7 @@ import { GET_JC_DEBT_SUMMARY } from "../../graphql/queries/jcPaymentQueries";
 import { GET_EXCHANGE_RATE } from "../../graphql/queries/exchangeRateQueries";
 
 import { UPDATE_EXCHANGE_RATE } from "../../graphql/mutations/exchangeRateMutations";
+import { RECALCULATE_BALANCE } from "../../graphql/mutations/companyBalanceMutations";
 
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
@@ -28,7 +29,13 @@ import { Modal } from "../../components/ui/Modal";
 import { LoadingOverlay } from "../../components/ui/LoadingUi";
 import { formatCRC, formatUSD } from "../../utils/formatters";
 
+import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
+
 const AdminDashboardPage = () => {
+	const { user } = useAuth();
+	const { toast } = useToast();
+
 	const [showExchangeModal, setShowExchangeModal] = useState(false);
 	const [newExchangeRate, setNewExchangeRate] = useState("");
 	const [updatingRate, setUpdatingRate] = useState(false);
@@ -45,6 +52,7 @@ const AdminDashboardPage = () => {
 	const { data: exchangeData } = useQuery(GET_EXCHANGE_RATE);
 
 	const [updateExchangeRate] = useMutation(UPDATE_EXCHANGE_RATE);
+	const [recalculateBalance] = useMutation(RECALCULATE_BALANCE);
 
 	const loading =
 		carsLoading || clientsLoading || balanceLoading || jcDebtLoading;
@@ -255,7 +263,7 @@ const AdminDashboardPage = () => {
 									color: "text-orange-500",
 								},
 								{
-									label: "Disponibles venta",
+									label: "Venta directa",
 									value: availableForSale,
 									icon: BsCarFront,
 									color: "text-green-500",
@@ -358,6 +366,22 @@ const AdminDashboardPage = () => {
 							Acciones Rápidas
 						</h2>
 						<div className="space-y-2">
+							{user?.role === "superadmin" && (
+								<Button
+									variant="secondary"
+									size="sm"
+									onClick={async () => {
+										try {
+											await recalculateBalance();
+											window.location.reload();
+										} catch (error) {
+											toast.error("Error al recalcular balance", error.message);
+										}
+									}}
+								>
+									Recalcular balance
+								</Button>
+							)}
 							<Link
 								to="/admin/cars"
 								className="flex items-center gap-2 w-full text-left px-4 py-3 rounded-xl bg-first/5 hover:bg-first/10 text-sm text-first transition-colors"

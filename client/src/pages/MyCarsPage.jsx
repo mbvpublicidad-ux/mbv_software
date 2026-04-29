@@ -7,11 +7,7 @@ import { BsCarFront, BsChevronRight } from "react-icons/bs";
 import MyCarsTimeline from "../components/clients/MyCarsTimeline";
 import EmptyState from "../components/ui/EmptyState";
 import { LoadingOverlay } from "../components/ui/LoadingUi";
-import {
-	formatCRC,
-	getLogisticStatusText,
-	getDetailsTranslation,
-} from "../utils/formatters";
+import { formatCRC, getDetailsTranslation } from "../utils/formatters";
 import Badge from "../components/ui/Badge";
 
 const MyCarsPage = () => {
@@ -57,32 +53,19 @@ const MyCarsPage = () => {
 										{/* Car Header */}
 										<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
 											<div className="flex items-center gap-4">
-												{car.images?.[0] ? (
-													<img
-														src={car.images[0]}
-														alt={`${car.brand?.name} ${car.carModel?.name}`}
-														className="w-20 h-20 rounded-xl object-cover"
-													/>
-												) : (
-													<div className="w-20 h-20 rounded-xl bg-first/5 flex items-center justify-center">
-														<BsCarFront className="w-8 h-8 text-first/20" />
-													</div>
-												)}
+												<div className="flex w-20 h-20 rounded-xl bg-first/5 items-center justify-center">
+													<BsCarFront className="w-8 h-8 text-first/20" />
+												</div>
 												<div>
 													<h2 className="text-xl font-semibold text-first">
 														{car.brand?.name} {car.carModel?.name} {car.year}
 													</h2>
-													<div className="flex items-center gap-2 mt-1">
-														<Badge variant="info" size="sm">
-															{getLogisticStatusText(car.logisticStatus)}
-														</Badge>
-														<Badge variant="warning" size="sm">
-															{getDetailsTranslation(
-																"availability",
-																car.availability,
-															)}
-														</Badge>
-													</div>
+													<Badge variant="warning" size="sm">
+														{getDetailsTranslation(
+															"availability",
+															car.availability,
+														)}
+													</Badge>
 												</div>
 											</div>
 
@@ -98,6 +81,32 @@ const MyCarsPage = () => {
 										{/* Timeline */}
 										<div className="mb-6">
 											<MyCarsTimeline logisticStatus={car.logisticStatus} />
+										</div>
+
+										{/* Progreso de pago */}
+										<div className="mb-6">
+											<div className="flex justify-between text-sm mb-1">
+												<span className="text-first/60">Progreso de pago</span>
+												<span className="text-first font-medium">
+													{formatCRC(
+														carPayments.reduce((sum, p) => sum + p.amount, 0),
+													)}{" "}
+													/ {formatCRC(car.publishedPriceCRC)}
+												</span>
+											</div>
+											<div className="w-full bg-first/5 rounded-full h-2.5">
+												<div
+													className={`h-2.5 rounded-full transition-all duration-500 ${
+														carPayments.reduce((sum, p) => sum + p.amount, 0) >=
+														car.publishedPriceCRC
+															? "bg-success"
+															: "bg-second"
+													}`}
+													style={{
+														width: `${Math.min(100, (carPayments.reduce((sum, p) => sum + p.amount, 0) / car.publishedPriceCRC) * 100)}%`,
+													}}
+												/>
+											</div>
 										</div>
 
 										{/* Payments */}

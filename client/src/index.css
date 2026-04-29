@@ -3,13 +3,13 @@
 .dark-theme {
 	--color-main: #052753;
 	--color-first: #f8fafc;
-	--color-second: #334155;
+	--color-second: #7594c0;
 }
 
 .light-theme {
 	--color-main: #ffffff;
 	--color-first: #0f172a;
-	--color-second: #0c7beb;
+	--color-second: #0cb7eb;
 }
 
 @theme {

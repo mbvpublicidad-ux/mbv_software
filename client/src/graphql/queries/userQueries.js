@@ -83,6 +83,7 @@ export const GET_CLIENTS = gql`
 			address
 			isDirectBuyer
 			active
+			registrationDate
 			temporaryPassword
 			commissionedCars {
 				_id
@@ -93,6 +94,7 @@ export const GET_CLIENTS = gql`
 					name
 				}
 				year
+				vin
 			}
 		}
 	}

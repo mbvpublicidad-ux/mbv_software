@@ -106,6 +106,7 @@ export const ASSIGN_CAR_TO_CLIENT = gql`
 					name
 				}
 				year
+				vin
 			}
 		}
 	}

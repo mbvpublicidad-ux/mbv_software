@@ -41,7 +41,7 @@ const CarDetail = () => {
 	const { id } = useParams();
 	const navigate = useNavigate();
 	const { user } = useAuth();
-	const { sendWhatsAppInquiry } = useWhatsApp();
+	const { sendWhatsAppInquiry, shareVehicle } = useWhatsApp();
 	const [showSimulator, setShowSimulator] = useState(false);
 
 	const isAdmin = user?.role === "admin" || user?.role === "superadmin";
@@ -144,7 +144,7 @@ const CarDetail = () => {
 							<p className="text-3xl font-bold text-second">
 								{formatCRC(car.publishedPriceCRC)}
 							</p>
-							{car.finalSalePriceCRC && (
+							{car.finalSalePriceCRC && car.availability === "Sold" && (
 								<p className="text-sm text-success mt-2">
 									Vendido por: {formatCRC(car.finalSalePriceCRC)}
 								</p>
@@ -152,27 +152,39 @@ const CarDetail = () => {
 						</div>
 
 						{/* Actions */}
-						{!isAdmin && car.availability === "Available" && (
-							<Button
-								variant="secondary"
-								size="lg"
-								fullWidth
-								onClick={() => sendWhatsAppInquiry(car)}
-							>
-								Consultar por WhatsApp
-							</Button>
-						)}
-
-						{isAdmin && (
+						<div className="flex gap-2">
+							{!isAdmin && car.availability === "Available" && (
+								<Button
+									variant="secondary"
+									size="lg"
+									fullWidth
+									onClick={() => sendWhatsAppInquiry(car)}
+								>
+									Consultar por WhatsApp
+								</Button>
+							)}
 							<Button
 								variant="primary"
 								size="lg"
 								fullWidth
-								onClick={() => setShowSimulator(!showSimulator)}
+								onClick={() => shareVehicle(car)}
+								aria-label="Compartir"
 							>
-								{showSimulator ? "Ocultar simulador" : "Simulador de ganancia"}
+								Compartir
 							</Button>
-						)}
+							{isAdmin && (
+								<Button
+									variant="primary"
+									size="lg"
+									fullWidth
+									onClick={() => setShowSimulator(!showSimulator)}
+								>
+									{showSimulator
+										? "Ocultar simulador"
+										: "Simulador de ganancia"}
+								</Button>
+							)}
+						</div>
 
 						{/* Specs Grid */}
 						<div className="grid grid-cols-2 gap-3">

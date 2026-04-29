@@ -158,7 +158,12 @@ export const getLogisticStatusText = (status) => {
 		"Dekra pending": "Dekra pendiente",
 		"Available for direct sale": "Disponible para venta directa",
 	};
-	return texts[status] || status;
+
+	const text = texts[status] || status;
+
+	return status === "Available for direct sale"
+		? text.slice(-14).replace("v", (str) => str.toUpperCase())
+		: text;
 };
 
 /**

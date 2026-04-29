@@ -39,7 +39,7 @@ const ClientPaymentsManagementPage = () => {
 		data: paymentsData,
 		loading,
 		refetch,
-	} = useQuery(GET_CLIENT_PAYMENTS);
+	} = useQuery(GET_CLIENT_PAYMENTS, { fetchPolicy: "cache-and-network" });
 	const { data: clientsData } = useQuery(GET_CLIENTS);
 	const { data: carsData } = useQuery(GET_CARS, {
 		variables: { page: 1, limit: 1000 },

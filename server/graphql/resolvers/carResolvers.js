@@ -10,6 +10,7 @@ import {
 } from "../../config/cloudinary.js";
 
 import { calculateCarProfit } from "../../utils/profitCalculator.js";
+import { getCurrentExchangeRate } from "../../utils/currencyConverter.js";
 
 const carResolvers = {
 	Query: {
@@ -53,9 +54,7 @@ const carResolvers = {
 			};
 		},
 
-		car: async (_, { id }, { user }) => {
-			if (!user) throw new Error("UNAUTHENTICATED");
-
+		car: async (_, { id }) => {
 			const car = await Car.findById(id)
 				.populate("brand")
 				.populate("carModel")
@@ -63,19 +62,6 @@ const carResolvers = {
 				.populate("expenses");
 
 			if (!car) throw new Error("Car not found");
-
-			// Check permissions for client users
-			if (user.role === "client") {
-				if (
-					car.assignedClient &&
-					car.assignedClient._id.toString() !== user._id.toString()
-				) {
-					throw new Error("Not authorized");
-				}
-				if (!car.assignedClient && car.availability !== "Available") {
-					throw new Error("Not authorized");
-				}
-			}
 
 			return car;
 		},
@@ -150,53 +136,53 @@ const carResolvers = {
 
 			const car = await Car.create(carData);
 
-			// Create mandatory expenses (Shipping line, Inspection, Tow truck)
-			const mandatoryExpenses = expenseInputs.filter((exp) =>
-				["Shipping line", "Inspection", "Tow truck"].includes(exp.type),
-			);
+			// Create Car purchase expense automatically
+			await Expense.create({
+				car: car._id,
+				type: "Car purchase",
+				amount: carData.purchaseValueUSD,
+				currency: "USD",
+				expenseDate: carData.purchaseDate,
+				isFromJuanCarlos: true,
+			});
 
-			// If mandatory expenses weren't provided in expenseInputs, create them with basic data
-			const requiredTypes = ["Shipping line", "Inspection", "Tow truck"];
-			const providedTypes = mandatoryExpenses.map((exp) => exp.type);
-
-			for (const type of requiredTypes) {
-				if (!providedTypes.includes(type)) {
-					mandatoryExpenses.push({
+			// Create expenses if provided
+			for (const expenseData of expenseInputs) {
+				if (expenseData.amount && Number(expenseData.amount) > 0) {
+					await Expense.create({
+						...expenseData,
 						car: car._id,
-						type,
-						amount: 0,
-						currency: type === "Shipping line" ? "CRC" : "USD",
-						expenseDate: new Date().toISOString(),
-						isFromJuanCarlos: type !== "Shipping line",
 					});
 				}
 			}
 
-			// Create all mandatory expenses
-			for (const expenseData of mandatoryExpenses) {
-				await Expense.create({
-					...expenseData,
-					car: car._id,
-				});
-			}
-
-			// Create optional expenses if provided
-			const optionalExpenses = expenseInputs.filter(
-				(exp) =>
-					!["Shipping line", "Inspection", "Tow truck"].includes(exp.type),
-			);
-
-			for (const expenseData of optionalExpenses) {
-				await Expense.create({
-					...expenseData,
-					car: car._id,
-				});
-			}
-
 			// Update car with expense references
 			const allExpenses = await Expense.find({ car: car._id });
+
 			car.expenses = allExpenses.map((exp) => exp._id);
+
 			await car.save();
+
+			// Update CompanyBalance with non-JC expenses
+			const balance = await CompanyBalance.findOne();
+			if (balance) {
+				const allExpenses = await Expense.find({
+					car: car._id,
+					isFromJuanCarlos: false,
+				});
+				let totalCRC = 0;
+				const rate = await getCurrentExchangeRate();
+
+				for (const exp of allExpenses) {
+					if (exp.currency === "CRC") totalCRC += exp.amount;
+					else totalCRC += exp.amount * rate;
+				}
+
+				balance.currentBalance -= totalCRC;
+				balance.lastUpdated = new Date();
+				balance.updatedBy = user._id;
+				await balance.save();
+			}
 
 			// If owner is Client, add car to client's commissionedCars
 			if (carData.owner === "Client" && input.assignedClient) {

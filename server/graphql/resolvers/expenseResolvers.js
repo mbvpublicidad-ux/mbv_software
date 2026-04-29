@@ -168,6 +168,24 @@ const expenseResolvers = {
 				});
 			}
 
+			// Reembolsar al balance si es gasto no-JC
+			if (!expense.isFromJuanCarlos) {
+				const balance = await CompanyBalance.findOne();
+				if (balance) {
+					if (expense.currency === "CRC") {
+						balance.currentBalance += expense.amount;
+					} else {
+						const { getCurrentExchangeRate } =
+							await import("../../utils/currencyConverter.js");
+						const rate = await getCurrentExchangeRate();
+						balance.currentBalance += expense.amount * rate;
+					}
+					balance.lastUpdated = new Date();
+					balance.updatedBy = user._id;
+					await balance.save();
+				}
+			}
+
 			await Expense.findByIdAndDelete(id);
 			return true;
 		},
