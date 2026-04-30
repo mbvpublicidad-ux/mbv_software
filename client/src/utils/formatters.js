@@ -175,6 +175,23 @@ export const getDetailsTranslation = (detailType, detail) => {
 	if (!detail) return "-";
 
 	const translation = {
+		expenseType: {
+			"Car purchase": "Compra del auto",
+			Inspection: "Inspección",
+			"Tow truck": "Grúa",
+			"Mileage adjustment in USA": "Ajuste de millaje en USA",
+			"Mileage adjustment in CR": "Ajuste de millaje en CR",
+			Taxes: "Impuestos",
+			Warehouse: "Almacén",
+			VAT: "IVA",
+			"Seller commission": "Comisión del vendedor",
+			"Car registration": "Inscripción",
+			Fuel: "Combustible",
+			"Spare parts": "Repuestos",
+			"Shipping line": "Naviera",
+			"Other Juan Carlos expenses": "Otros gastos Juan Carlos",
+			"Other expenses": "Otros gastos",
+		},
 		availability: {
 			Available: "Disponible",
 			Reserved: "Reservado",

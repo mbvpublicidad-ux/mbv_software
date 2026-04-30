@@ -6,7 +6,7 @@ const carDefs = gql`
 		brand: Brand!
 		carModel: CarModel!
 		vin: String!
-		dua: String!
+		dua: String
 		year: Int!
 		purchaseDate: String!
 		saleDate: String
@@ -52,7 +52,7 @@ const carDefs = gql`
 		brand: ID!
 		carModel: ID!
 		vin: String!
-		dua: String!
+		dua: String
 		year: Int!
 		purchaseDate: String!
 		duaRegistrationDate: String

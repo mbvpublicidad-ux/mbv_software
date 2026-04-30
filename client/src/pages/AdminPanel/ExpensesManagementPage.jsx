@@ -1,14 +1,19 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
+
 import { GET_EXPENSES } from "../../graphql/queries/expenseQueries";
 import { DELETE_EXPENSE } from "../../graphql/mutations/expenseMutations";
+
 import { useToast } from "../../context/ToastContext";
+
 import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
 import { Modal, ConfirmDialog } from "../../components/ui/Modal";
 import { LoadingOverlay } from "../../components/ui/LoadingUi";
 import EmptyState from "../../components/ui/EmptyState";
 import ExpenseForm from "../../components/expenses/ExpenseForm";
+import ExpensesAnalytics from "../../components/expenses/ExpensesAnalytics";
+
 import {
 	BsPlus,
 	BsPencil,
@@ -18,8 +23,15 @@ import {
 	BsCalendar,
 	BsCash,
 	BsFileText,
+	BsGraphUp,
 } from "react-icons/bs";
-import { formatCRC, formatUSD, formatDate } from "../../utils/formatters";
+
+import {
+	formatCRC,
+	formatUSD,
+	formatDate,
+	getDetailsTranslation,
+} from "../../utils/formatters";
 
 const ExpensesManagementPage = () => {
 	const { toast } = useToast();
@@ -27,8 +39,10 @@ const ExpensesManagementPage = () => {
 	const [isFormOpen, setIsFormOpen] = useState(false);
 	const [editingExpense, setEditingExpense] = useState(null);
 	const [deleteConfirm, setDeleteConfirm] = useState(null);
+	const [showAnalytics, setShowAnalytics] = useState(false);
 
 	const { data, loading, refetch } = useQuery(GET_EXPENSES);
+
 	const [deleteExpense] = useMutation(DELETE_EXPENSE);
 
 	const expenses = data?.expenses || [];
@@ -40,7 +54,8 @@ const ExpensesManagementPage = () => {
 			exp.type?.toLowerCase().includes(s) ||
 			exp.car?.brand?.name?.toLowerCase().includes(s) ||
 			exp.car?.carModel?.name?.toLowerCase().includes(s) ||
-			exp.description?.toLowerCase().includes(s)
+			exp.description?.toLowerCase().includes(s) ||
+			exp.car?.vin?.toLowerCase().includes(s)
 		);
 	});
 
@@ -77,19 +92,35 @@ const ExpensesManagementPage = () => {
 					</Button>
 				</div>
 
-				<div className="max-w-md mb-6">
-					<div className="relative">
+				<div className="flex flex-col md:flex-row gap-4 mb-6">
+					<div className="relative max-w-md">
 						<BsSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-first/30" />
 						<input
 							type="text"
 							placeholder="Buscar gastos..."
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
-							className="w-full pl-10 pr-4 py-2 rounded-xl border border-first/10 bg-main text-first text-sm
-                       focus:outline-none focus:ring-2 focus:ring-second/30 focus:border-second placeholder:text-first/30"
+							className="w-full pl-10 pr-4 py-2 rounded-xl border border-first/10 bg-main text-first text-sm focus:outline-none focus:ring-2 focus:ring-second/30 focus:border-second placeholder:text-first/30"
 						/>
 					</div>
 				</div>
+
+				{/* Analytics Section */}
+				{/* Analytics Section */}
+				{expenses.length > 0 && (
+					<div className="mb-8">
+						<div className="flex justify-center mb-5">
+							<Button
+								onClick={() => setShowAnalytics(!showAnalytics)}
+								icon={<BsGraphUp className="w-4 h-4" />}
+								variant="outline"
+							>
+								{showAnalytics ? "Ocultar analíticas" : "Ver analíticas"}
+							</Button>
+						</div>
+						{showAnalytics && <ExpensesAnalytics expenses={filteredExpenses} />}
+					</div>
+				)}
 
 				{filteredExpenses.length > 0 ? (
 					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
@@ -123,7 +154,7 @@ const ExpensesManagementPage = () => {
 											{expense.isFromJuanCarlos ? "JC" : "MBV"}
 										</Badge>
 										<p className="text-sm text-first/70 truncate">
-											{expense.type}
+											{getDetailsTranslation("expenseType", expense.type)}
 										</p>
 									</div>
 

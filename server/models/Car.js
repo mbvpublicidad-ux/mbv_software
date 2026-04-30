@@ -21,8 +21,6 @@ const carSchema = new mongoose.Schema({
 	},
 	dua: {
 		type: String,
-		required: [true, "El DUA es requerido"],
-		unique: true,
 		trim: true,
 	},
 	year: {
