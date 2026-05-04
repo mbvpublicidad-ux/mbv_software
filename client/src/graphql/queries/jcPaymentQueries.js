@@ -9,15 +9,18 @@ export const GET_JC_PAYMENTS = gql`
 			registrationDate
 			concept
 			associatedCars {
-				_id
-				brand {
-					name
+				car {
+					_id
+					brand {
+						name
+					}
+					carModel {
+						name
+					}
+					year
+					vin
 				}
-				carModel {
-					name
-				}
-				year
-				vin
+				amount
 			}
 			receipt
 			transferReference
@@ -46,14 +49,18 @@ export const GET_JC_DEBT_SUMMARY = gql`
 				actualPaymentDate
 				concept
 				associatedCars {
-					_id
-					brand {
-						name
+					car {
+						_id
+						brand {
+							name
+						}
+						carModel {
+							name
+						}
+						year
+						vin
 					}
-					carModel {
-						name
-					}
-					year
+					amount
 				}
 			}
 		}

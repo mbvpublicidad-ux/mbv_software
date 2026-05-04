@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { useMutation } from "@apollo/client/react";
+import { useMutation, useQuery } from "@apollo/client/react";
 
 import {
 	BsPlus,
@@ -40,6 +40,9 @@ import {
 	AVAILABILITY_OPTIONS,
 } from "../../utils/constants";
 
+import { GET_EXPENSES } from "../../graphql/queries/expenseQueries";
+import { GET_JC_PAYMENTS } from "../../graphql/queries/jcPaymentQueries";
+
 import { MARK_CAR_AS_SOLD } from "../../graphql/mutations/carMutations";
 
 const CarsManagementPage = () => {
@@ -65,12 +68,17 @@ const CarsManagementPage = () => {
 	const [editingCar, setEditingCar] = useState(null);
 
 	const [sellModal, setSellModal] = useState(null);
+
 	const [sellForm, setSellForm] = useState({
 		finalSalePriceCRC: "",
 		saleDate: new Date().toISOString().split("T")[0],
 		buyerName: "",
 	});
+
 	const [markingSold, setMarkingSold] = useState(false);
+
+	const { data: jcPaymentsData } = useQuery(GET_JC_PAYMENTS);
+	const { data: expensesData } = useQuery(GET_EXPENSES);
 
 	const handleDelete = async (id) => {
 		try {
@@ -125,6 +133,35 @@ const CarsManagementPage = () => {
 			toast.error(error.message || "Error al marcar como vendido");
 		}
 		setMarkingSold(false);
+	};
+
+	const getJCPaymentStatus = (carId) => {
+		const carExpenses = (expensesData?.expenses || []).filter(
+			(e) => e.car?._id === carId && e.isFromJuanCarlos,
+		);
+		const totalJCDebt = carExpenses.reduce(
+			(sum, e) => sum + (e.currency === "USD" ? e.amount : 0),
+			0,
+		);
+
+		if (totalJCDebt === 0) return null;
+
+		let totalPaid = 0;
+		const allPayments = jcPaymentsData?.jcPayments || [];
+
+		for (const payment of allPayments) {
+			const associatedCars = payment.associatedCars || [];
+			for (const ac of associatedCars) {
+				if (ac.car?._id === carId || ac._id === carId) {
+					totalPaid += ac.amount || 0;
+				}
+			}
+		}
+
+		if (totalPaid >= totalJCDebt)
+			return { variant: "success", label: "JC Pagado" };
+		if (totalPaid > 0) return { variant: "warning", label: "JC Parcial" };
+		return { variant: "error", label: "JC Pendiente" };
 	};
 
 	if (carsLoading)
@@ -217,7 +254,7 @@ const CarsManagementPage = () => {
 									{/* Content */}
 									<Link
 										to={`/car/${car._id}`}
-										className="block text-center p-4 pt-10"
+										className="block text-center gap-2 p-4 pt-10"
 									>
 										<h3 className="font-semibold text-first text-sm line-clamp-1">
 											{car.brand?.name} {car.carModel?.name} {car.year}{" "}
@@ -229,6 +266,10 @@ const CarsManagementPage = () => {
 									<div className="px-4 pb-2 space-y-2">
 										<p className="text-lg font-bold text-second">
 											{formatCRC(car.publishedPriceCRC)}
+										</p>
+
+										<p className="text-xs text-second">
+											Millaje real: {formatMileage(car.actualMileage)}
 										</p>
 
 										<div className="flex items-center justify-center gap-2 text-xs text-first/50">
@@ -254,6 +295,15 @@ const CarsManagementPage = () => {
 													car.availability,
 												)}
 											</Badge>
+											{(() => {
+												const jcStatus = getJCPaymentStatus(car._id);
+												if (!jcStatus) return null;
+												return (
+													<Badge size="sm" variant={jcStatus.variant}>
+														{jcStatus.label}
+													</Badge>
+												);
+											})()}
 										</div>
 
 										<p className="text-xs text-first/40">

@@ -43,7 +43,7 @@ const GeneralExpensesPage = () => {
 					<div>
 						<h1 className="text-3xl font-bold text-first">Gastos Generales</h1>
 						<p className="text-first/50 mt-1">
-							{expenses.length} gastos (no ligados a autos)
+							{expenses.length} gastos
 						</p>
 					</div>
 					<Button
@@ -58,96 +58,65 @@ const GeneralExpensesPage = () => {
 				</div>
 
 				{expenses.length > 0 ? (
-					<div className="bg-main rounded-2xl border border-first/10 overflow-hidden">
-						<div className="overflow-x-auto">
-							<table className="w-full">
-								<thead>
-									<tr className="border-b border-first/10">
-										<th className="text-left p-4 text-xs font-medium text-first/40 uppercase">
-											Concepto
-										</th>
-										<th className="text-left p-4 text-xs font-medium text-first/40 uppercase">
-											Monto
-										</th>
-										<th className="text-left p-4 text-xs font-medium text-first/40 uppercase">
-											Fecha
-										</th>
-										<th className="text-left p-4 text-xs font-medium text-first/40 uppercase">
-											Descripción
-										</th>
-										<th className="text-right p-4 text-xs font-medium text-first/40 uppercase">
-											Acciones
-										</th>
-									</tr>
-								</thead>
-								<tbody>
-									{expenses.map((expense) => (
-										<tr
-											key={expense._id}
-											className="border-b border-first/5 hover:bg-first/5"
-										>
-											<td className="p-4">
-												<p className="font-medium text-first text-sm">
-													{expense.concept}
-												</p>
-											</td>
-											<td className="p-4">
-												<p className="text-sm font-medium text-first">
-													{expense.currency === "CRC"
-														? formatCRC(expense.amount)
-														: formatUSD(expense.amount)}
-												</p>
-											</td>
-											<td className="p-4">
-												<p className="text-sm text-first/60">
-													{formatDate(expense.expenseDate)}
-												</p>
-											</td>
-											<td className="p-4">
-												<p className="text-sm text-first/50 max-w-xs truncate">
-													{expense.description || "—"}
-												</p>
-											</td>
-											<td className="p-4">
-												<div className="flex items-center justify-end gap-1">
-													{expense.receipt && (
-														<Button
-															iconOnly
-															variant="ghost"
-															size="sm"
-															className="text-second"
-															icon={<BsFileText className="w-3.5 h-3.5" />}
-															onClick={() =>
-																window.open(expense.receipt, "_blank")
-															}
-															title="Ver comprobante"
-														/>
-													)}
-													<Button
-														iconOnly
-														variant="ghost"
-														size="sm"
-														icon={<BsPencil className="w-3.5 h-3.5" />}
-														onClick={() => {
-															setEditingExpense(expense);
-															setIsFormOpen(true);
-														}}
-													/>
-													<Button
-														iconOnly
-														variant="ghost"
-														size="sm"
-														className="text-error"
-														icon={<BsTrash className="w-3.5 h-3.5" />}
-														onClick={() => setDeleteConfirm(expense._id)}
-													/>
-												</div>
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+						{expenses.map((expense) => (
+							<div
+								key={expense._id}
+								className="bg-main rounded-2xl border border-first/10 hover:shadow-lg hover:border-second/20 transition-all duration-200"
+							>
+								<div className="p-4">
+									<p className="text-sm font-medium text-first truncate mb-2">
+										{expense.concept}
+									</p>
+									{expense.description && (
+										<p className="text-xs text-first/40 mb-3 truncate">
+											{expense.description}
+										</p>
+									)}
+									<div className="flex items-center justify-between pt-3 border-t border-first/5">
+										<p className="text-lg font-bold text-second">
+											{expense.currency === "CRC"
+												? formatCRC(expense.amount)
+												: formatUSD(expense.amount)}
+										</p>
+										<p className="text-xs text-first/40">
+											{formatDate(expense.expenseDate)}
+										</p>
+									</div>
+								</div>
+								<div className="px-4 pb-3 flex gap-1 justify-end border-t border-first/5 pt-2">
+									{expense.receipt && (
+										<Button
+											iconOnly
+											variant="ghost"
+											size="sm"
+											className="text-second"
+											icon={<BsFileText className="w-3.5 h-3.5" />}
+											onClick={() => window.open(expense.receipt, "_blank")}
+											title="Ver comprobante"
+										/>
+									)}
+									<Button
+										iconOnly
+										variant="ghost"
+										size="sm"
+										icon={<BsPencil className="w-3.5 h-3.5" />}
+										onClick={() => {
+											setEditingExpense(expense);
+											setIsFormOpen(true);
+										}}
+									/>
+									<Button
+										iconOnly
+										variant="ghost"
+										size="sm"
+										className="text-error"
+										icon={<BsTrash className="w-3.5 h-3.5" />}
+										onClick={() => setDeleteConfirm(expense._id)}
+									/>
+								</div>
+							</div>
+						))}
 					</div>
 				) : (
 					<EmptyState

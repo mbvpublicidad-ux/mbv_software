@@ -14,10 +14,17 @@ import Select from "../../components/ui/Select";
 import { Modal, ConfirmDialog } from "../../components/ui/Modal";
 import { LoadingOverlay } from "../../components/ui/LoadingUi";
 import EmptyState from "../../components/ui/EmptyState";
-import { BsPlus, BsPencil, BsTrash, BsFileText } from "react-icons/bs";
+import {
+	BsPlus,
+	BsPencil,
+	BsTrash,
+	BsFileText,
+	BsPerson,
+} from "react-icons/bs";
 import { formatCRC, formatDate } from "../../utils/formatters";
 import ImageUploader from "../../components/cars/ImageUploader";
 import CarSearchSelect from "../../components/cars/CarSearchSelect";
+import Badge from "../../components/ui/Badge";
 
 const ClientPaymentsManagementPage = () => {
 	const { toast } = useToast();
@@ -180,111 +187,72 @@ const ClientPaymentsManagementPage = () => {
 				</div>
 
 				{payments.length > 0 ? (
-					<div className="bg-main rounded-2xl border border-first/10 overflow-hidden">
-						<div className="overflow-x-auto">
-							<table className="w-full">
-								<thead>
-									<tr className="border-b border-first/10">
-										<th className="text-left p-4 text-xs font-medium text-first/40 uppercase">
-											Cliente
-										</th>
-										<th className="text-left p-4 text-xs font-medium text-first/40 uppercase">
-											Auto
-										</th>
-										<th className="text-left p-4 text-xs font-medium text-first/40 uppercase">
-											Monto
-										</th>
-										<th className="text-left p-4 text-xs font-medium text-first/40 uppercase">
-											Fecha
-										</th>
-										<th className="text-left p-4 text-xs font-medium text-first/40 uppercase">
-											Método
-										</th>
-										<th className="text-right p-4 text-xs font-medium text-first/40 uppercase">
-											Acciones
-										</th>
-									</tr>
-								</thead>
-								<tbody>
-									{payments.map((payment) => (
-										<tr
-											key={payment._id}
-											className="border-b border-first/5 hover:bg-first/5 transition-colors"
-										>
-											<td className="p-4">
-												<p className="font-medium text-first text-sm">
-													{payment.client?.name}
-												</p>
-												<p className="text-xs text-first/40">
-													{payment.client?.email}
-												</p>
-											</td>
-											<td className="p-4">
-												<p className="text-sm text-first/70">
-													{payment.car?.brand?.name}{" "}
-													{payment.car?.carModel?.name}
-												</p>
-												<p className="text-xs text-first/40">
-													{payment.car?.year}
-												</p>
-											</td>
-											<td className="p-4">
-												<p className="font-semibold text-first">
-													{formatCRC(payment.amount)}
-												</p>
-												{payment.pendingBalance > 0 && (
-													<p className="text-xs text-warning">
-														Pendiente: {formatCRC(payment.pendingBalance)}
-													</p>
-												)}
-											</td>
-											<td className="p-4">
-												<p className="text-sm text-first/60">
-													{formatDate(payment.paymentDate)}
-												</p>
-											</td>
-											<td className="p-4">
-												<p className="text-sm text-first/60">
-													{payment.paymentMethod || "—"}
-												</p>
-											</td>
-											<td className="p-4">
-												<div className="flex items-center justify-end gap-1">
-													{payment.receipt && (
-														<Button
-															iconOnly
-															variant="ghost"
-															size="sm"
-															className="text-second"
-															icon={<BsFileText className="w-3.5 h-3.5" />}
-															onClick={() =>
-																window.open(payment.receipt, "_blank")
-															}
-															title="Ver comprobante"
-														/>
-													)}
-													<Button
-														iconOnly
-														variant="ghost"
-														size="sm"
-														icon={<BsPencil className="w-3.5 h-3.5" />}
-														onClick={() => openEditModal(payment)}
-													/>
-													<Button
-														iconOnly
-														variant="ghost"
-														size="sm"
-														className="text-error"
-														icon={<BsTrash className="w-3.5 h-3.5" />}
-														onClick={() => setDeleteConfirm(payment._id)}
-													/>
-												</div>
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+						{payments.map((payment) => (
+							<div
+								key={payment._id}
+								className="bg-main rounded-2xl border border-first/10 hover:shadow-lg hover:border-second/20 transition-all duration-200"
+							>
+								<div className="p-4">
+									<div className="flex items-center gap-2 mb-2">
+										<div className="w-8 h-8 rounded-full bg-first/5 flex items-center justify-center shrink-0">
+											<BsPerson className="w-4 h-4 text-first/30" />
+										</div>
+										<p className="text-sm font-medium text-first truncate">
+											{payment.client?.name}
+										</p>
+									</div>
+									<p className="text-xs text-first/40 mb-2 truncate">
+										{payment.car?.brand?.name} {payment.car?.carModel?.name}{" "}
+										{payment.car?.year}
+									</p>
+									<p className="text-xl font-bold text-second mb-1">
+										{formatCRC(payment.amount)}
+									</p>
+									{payment.pendingBalance > 0 && (
+										<Badge variant="warning" size="sm" className="mb-2">
+											Pendiente: {formatCRC(payment.pendingBalance)}
+										</Badge>
+									)}
+									<div className="flex items-center justify-between pt-3 border-t border-first/5">
+										<p className="text-xs text-first/40">
+											{formatDate(payment.paymentDate)}
+										</p>
+										<p className="text-xs text-first/40">
+											{payment.paymentMethod || "—"}
+										</p>
+									</div>
+								</div>
+								<div className="px-4 pb-3 flex gap-1 justify-end border-t border-first/5 pt-2">
+									{payment.receipt && (
+										<Button
+											iconOnly
+											variant="ghost"
+											size="sm"
+											className="text-second"
+											icon={<BsFileText className="w-3.5 h-3.5" />}
+											onClick={() => window.open(payment.receipt, "_blank")}
+											title="Ver comprobante"
+										/>
+									)}
+									<Button
+										iconOnly
+										variant="ghost"
+										size="sm"
+										icon={<BsPencil className="w-3.5 h-3.5" />}
+										onClick={() => openEditModal(payment)}
+									/>
+									<Button
+										iconOnly
+										variant="ghost"
+										size="sm"
+										className="text-error"
+										icon={<BsTrash className="w-3.5 h-3.5" />}
+										onClick={() => setDeleteConfirm(payment._id)}
+									/>
+								</div>
+							</div>
+						))}
 					</div>
 				) : (
 					<EmptyState
@@ -346,24 +314,15 @@ const ClientPaymentsManagementPage = () => {
 								}
 							/>
 							<Input
-								label="Saldo pendiente (CRC)"
-								type="number"
-								min={0}
-								value={formData.pendingBalance}
+								label="Fecha del pago"
+								type="date"
+								required
+								value={formData.paymentDate}
 								onChange={(e) =>
-									setFormData((p) => ({ ...p, pendingBalance: e.target.value }))
+									setFormData((p) => ({ ...p, paymentDate: e.target.value }))
 								}
 							/>
 						</div>
-						<Input
-							label="Fecha del pago"
-							type="date"
-							required
-							value={formData.paymentDate}
-							onChange={(e) =>
-								setFormData((p) => ({ ...p, paymentDate: e.target.value }))
-							}
-						/>
 						<Select
 							label="Método de pago"
 							options={paymentMethodOptions}

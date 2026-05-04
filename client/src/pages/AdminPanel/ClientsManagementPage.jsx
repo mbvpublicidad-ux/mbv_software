@@ -1,19 +1,26 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
-import { GET_CLIENTS } from "../../graphql/queries/userQueries";
+
 import {
 	DELETE_USER,
 	ASSIGN_CAR_TO_CLIENT,
 	REMOVE_CAR_FROM_CLIENT,
 } from "../../graphql/mutations/userMutations";
+
 import { GET_CARS } from "../../graphql/queries/carQueries";
+import { GET_CLIENTS } from "../../graphql/queries/userQueries";
+
 import { useToast } from "../../context/ToastContext";
-import Button from "../../components/ui/Button";
+
 import Badge from "../../components/ui/Badge";
-import { Modal, ConfirmDialog } from "../../components/ui/Modal";
-import { LoadingOverlay } from "../../components/ui/LoadingUi";
+import Button from "../../components/ui/Button";
 import EmptyState from "../../components/ui/EmptyState";
 import ClientForm from "../../components/clients/ClientForm";
+import CarSearchSelect from "../../components/cars/CarSearchSelect";
+
+import { LoadingOverlay } from "../../components/ui/LoadingUi";
+import { Modal, ConfirmDialog } from "../../components/ui/Modal";
+
 import {
 	BsPlus,
 	BsPencil,
@@ -25,12 +32,13 @@ import {
 	BsX,
 } from "react-icons/bs";
 import { FaBarcode } from "react-icons/fa";
+
 import { formatDate } from "../../utils/formatters";
 
 const ClientsManagementPage = () => {
 	const { toast } = useToast();
 	const { data: clientsData, loading, refetch } = useQuery(GET_CLIENTS);
-	const { data: carsData, refetch: refetchCars } = useQuery(GET_CARS, {
+	const { refetch: refetchCars } = useQuery(GET_CARS, {
 		variables: { page: 1, limit: 1000 },
 	});
 
@@ -42,12 +50,9 @@ const ClientsManagementPage = () => {
 	const [editingClient, setEditingClient] = useState(null);
 	const [deleteConfirm, setDeleteConfirm] = useState(null);
 	const [assigningCar, setAssigningCar] = useState(null);
+	const [selectedCarToAssign, setSelectedCarToAssign] = useState("");
 
 	const clients = clientsData?.clients || [];
-	const availableCars =
-		carsData?.cars?.cars?.filter(
-			(c) => c.availability !== "Sold" && !c.assignedClient,
-		) || [];
 
 	const handleDelete = async (id) => {
 		try {
@@ -269,25 +274,28 @@ const ClientsManagementPage = () => {
 					title="Asignar Auto"
 					size="md"
 				>
-					<div className="space-y-2 max-h-96 overflow-y-auto">
-						{availableCars.length > 0 ? (
-							availableCars.map((car) => (
-								<button
-									key={car._id}
-									onClick={() => handleAssignCar(car._id)}
-									className="w-full cursor-pointer text-left p-3 rounded-xl bg-first/5 hover:bg-first/10 transition-colors"
-								>
-									<p className="font-medium text-first">
-										{car.brand?.name} {car.carModel?.name} {car.year}
-									</p>
-									<p className="text-sm text-first/40">{car.vin}</p>
-								</button>
-							))
-						) : (
-							<p className="text-center text-first/40 py-8">
-								No hay autos disponibles
-							</p>
-						)}
+					<div className="space-y-4">
+						<CarSearchSelect
+							value={selectedCarToAssign}
+							onChange={setSelectedCarToAssign}
+							placeholder="Buscar auto para asignar..."
+						/>
+						<div className="flex justify-end gap-2">
+							<Button variant="ghost" onClick={() => setAssigningCar(null)}>
+								Cancelar
+							</Button>
+							<Button
+								onClick={() => {
+									if (selectedCarToAssign) {
+										handleAssignCar(selectedCarToAssign);
+										setSelectedCarToAssign("");
+									}
+								}}
+								disabled={!selectedCarToAssign}
+							>
+								Asignar auto
+							</Button>
+						</div>
 					</div>
 				</Modal>
 

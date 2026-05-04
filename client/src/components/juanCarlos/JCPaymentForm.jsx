@@ -1,7 +1,10 @@
-import { useState } from "react";
+/* eslint-disable react-hooks/set-state-in-effect */
+import { useEffect, useState } from "react";
 import { useQuery, useMutation } from "@apollo/client/react";
 
 import { GET_CARS } from "../../graphql/queries/carQueries";
+import { GET_EXPENSES } from "../../graphql/queries/expenseQueries";
+import { GET_JC_PAYMENTS } from "../../graphql/queries/jcPaymentQueries";
 
 import {
 	CREATE_JC_PAYMENT,
@@ -9,6 +12,8 @@ import {
 } from "../../graphql/mutations/jcPaymentMutations";
 
 import { useToast } from "../../context/ToastContext";
+
+import { formatUSD } from "../../utils/formatters";
 
 import Input from "../ui/Input";
 import Button from "../ui/Button";
@@ -35,7 +40,13 @@ const JCPaymentForm = ({ payment, onClose, onSuccess }) => {
 					? payment.actualPaymentDate.split("T")[0]
 					: new Date().toISOString().split("T")[0],
 				concept: payment.concept || "",
-				associatedCars: payment.associatedCars?.map((c) => c._id) || [],
+				associatedCars:
+					payment.associatedCars?.map((ac) => ({
+						carId: ac.car?._id || ac._id,
+						amount: ac.amount?.toString() || "",
+						debt: 0,
+						pending: 0,
+					})) || [],
 				transferReference: payment.transferReference || "",
 			};
 		}
@@ -53,6 +64,42 @@ const JCPaymentForm = ({ payment, onClose, onSuccess }) => {
 	const { data: carsData } = useQuery(GET_CARS, {
 		variables: { page: 1, limit: 1000 },
 	});
+
+	const { data: expensesData } = useQuery(GET_EXPENSES);
+	const { data: jcPaymentsData } = useQuery(GET_JC_PAYMENTS);
+
+	useEffect(() => {
+		if (!expensesData || !jcPaymentsData) return;
+
+		setFormData((prev) => ({
+			...prev,
+			associatedCars: prev.associatedCars.map((item) => {
+				const carExpenses = (expensesData?.expenses || []).filter(
+					(e) => e.car?._id === item.carId && e.isFromJuanCarlos,
+				);
+				const totalDebt = carExpenses.reduce(
+					(sum, e) => sum + (e.currency === "USD" ? e.amount : 0),
+					0,
+				);
+
+				let alreadyPaid = 0;
+				(jcPaymentsData?.jcPayments || []).forEach((p) => {
+					const found = (p.associatedCars || []).find(
+						(ac) => ac.car?._id === item.carId || ac._id === item.carId,
+					);
+					if (found) {
+						alreadyPaid +=
+							found.amount || p.amount / (p.associatedCars?.length || 1);
+					}
+				});
+
+				const pending = Math.max(0, totalDebt - alreadyPaid);
+
+				return { ...item, debt: totalDebt, pending };
+			}),
+		}));
+	}, [expensesData, jcPaymentsData]);
+
 	const [createPayment, { loading: creating }] = useMutation(CREATE_JC_PAYMENT);
 	const [updatePayment, { loading: updating }] = useMutation(UPDATE_JC_PAYMENT);
 
@@ -81,26 +128,6 @@ const JCPaymentForm = ({ payment, onClose, onSuccess }) => {
 		return Object.keys(newErrors).length === 0;
 	};
 
-	const addCar = () => {
-		if (!selectedCarToAdd) return;
-		if (formData.associatedCars.includes(selectedCarToAdd)) {
-			setSelectedCarToAdd("");
-			return;
-		}
-		setFormData((prev) => ({
-			...prev,
-			associatedCars: [...prev.associatedCars, selectedCarToAdd],
-		}));
-		setSelectedCarToAdd("");
-	};
-
-	const removeCar = (carId) => {
-		setFormData((prev) => ({
-			...prev,
-			associatedCars: prev.associatedCars.filter((id) => id !== carId),
-		}));
-	};
-
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		if (!validate()) return;
@@ -112,7 +139,10 @@ const JCPaymentForm = ({ payment, onClose, onSuccess }) => {
 				concept: formData.concept.trim() || undefined,
 				associatedCars:
 					formData.associatedCars.length > 0
-						? formData.associatedCars
+						? formData.associatedCars.map((c) => ({
+								car: c.carId,
+								amount: Number(c.amount) || 0,
+							}))
 						: undefined,
 				transferReference: formData.transferReference.trim() || undefined,
 				receipt: formData.receipt || undefined,
@@ -135,6 +165,13 @@ const JCPaymentForm = ({ payment, onClose, onSuccess }) => {
 			toast.error(error.message || "Error al guardar pago");
 		}
 	};
+
+	const totalAssigned = formData.associatedCars.reduce(
+		(sum, c) => sum + (Number(c.amount) || 0),
+		0,
+	);
+
+	const pendingToAssign = formData.amount - totalAssigned;
 
 	return (
 		<form onSubmit={handleSubmit} className="space-y-4">
@@ -176,7 +213,7 @@ const JCPaymentForm = ({ payment, onClose, onSuccess }) => {
 				</p>
 
 				{/* Buscador para agregar */}
-				<div className="flex gap-2 mb-2">
+				<div className="flex flex-col sm:flex-row sm:gap-2 mb-3">
 					<div className="flex-1">
 						<CarSearchSelect
 							value={selectedCarToAdd}
@@ -187,7 +224,54 @@ const JCPaymentForm = ({ payment, onClose, onSuccess }) => {
 					<Button
 						type="button"
 						size="sm"
-						onClick={addCar}
+						onClick={() => {
+							if (!selectedCarToAdd) return;
+							const alreadyAdded = formData.associatedCars.find(
+								(c) => c.carId === selectedCarToAdd,
+							);
+							if (alreadyAdded) {
+								setSelectedCarToAdd("");
+								return;
+							}
+							// Calcular deuda JC del auto
+							const carExpenses =
+								expensesData?.expenses?.filter(
+									(e) => e.car?._id === selectedCarToAdd && e.isFromJuanCarlos,
+								) || [];
+							const totalDebt = carExpenses.reduce(
+								(sum, e) => sum + (e.currency === "USD" ? e.amount : 0),
+								0,
+							);
+							// Calcular pagos previos a este auto
+							let alreadyPaid = 0;
+							(jcPaymentsData?.jcPayments || []).forEach((p) => {
+								const found = (p.associatedCars || []).find(
+									(ac) =>
+										ac.car?._id === selectedCarToAdd ||
+										ac._id === selectedCarToAdd,
+								);
+								if (found?.amount) {
+									alreadyPaid += found.amount;
+								} else if (found) {
+									alreadyPaid += p.amount / (p.associatedCars?.length || 1);
+								}
+							});
+							const pending = Math.max(0, totalDebt - alreadyPaid);
+
+							setFormData((prev) => ({
+								...prev,
+								associatedCars: [
+									...prev.associatedCars,
+									{
+										carId: selectedCarToAdd,
+										amount: "",
+										debt: totalDebt,
+										pending,
+									},
+								],
+							}));
+							setSelectedCarToAdd("");
+						}}
 						disabled={!selectedCarToAdd}
 						className="h-10 mt-5"
 					>
@@ -195,34 +279,81 @@ const JCPaymentForm = ({ payment, onClose, onSuccess }) => {
 					</Button>
 				</div>
 
-				{/* Lista de autos agregados */}
+				{/* Lista de autos agregados con montos */}
 				{formData.associatedCars.length > 0 ? (
-					<div className="space-y-1 border border-first/10 rounded-xl p-2">
-						{formData.associatedCars.map((carId) => {
-							const car = cars.find((c) => c._id === carId);
+					<div className="space-y-2">
+						{formData.associatedCars.map((item, index) => {
+							const car = cars.find((c) => c._id === item.carId);
 							return (
 								<div
-									key={carId}
-									className="flex items-center justify-between p-2 rounded-lg bg-first/5"
+									key={item.carId}
+									className="border border-first/10 rounded-xl p-3 space-y-2"
 								>
-									<div>
-										<p className="text-sm text-first">
-											{car?.brand?.name} {car?.carModel?.name} {car?.year}
-										</p>
-										<p className="text-xs text-first/40">{car?.vin}</p>
+									<div className="flex items-center justify-between">
+										<div>
+											<p className="text-sm font-medium text-first">
+												{car?.brand?.name} {car?.carModel?.name} {car?.year}
+											</p>
+											<p className="text-xs text-first/40">
+												Deuda: {formatUSD(item.debt)} | Pendiente:{" "}
+												{formatUSD(item.pending)}
+											</p>
+										</div>
+										<Button
+											type="button"
+											variant="ghost"
+											size="sm"
+											className="text-error"
+											onClick={() => {
+												setFormData((prev) => ({
+													...prev,
+													associatedCars: prev.associatedCars.filter(
+														(_, i) => i !== index,
+													),
+												}));
+											}}
+										>
+											Quitar
+										</Button>
 									</div>
-									<Button
-										type="button"
-										variant="ghost"
+									<Input
+										label="Monto a pagar (USD)"
+										type="number"
 										size="sm"
-										className="text-error"
-										onClick={() => removeCar(carId)}
-									>
-										Quitar
-									</Button>
+										value={item.amount}
+										onChange={(e) => {
+											const newValue = Number(e.target.value) || 0;
+											const maxAllowed =
+												pendingToAssign + Number(item.amount || 0);
+											const newCars = [...formData.associatedCars];
+											newCars[index].amount = Math.min(
+												newValue,
+												maxAllowed,
+											).toString();
+											setFormData((prev) => ({
+												...prev,
+												associatedCars: newCars,
+											}));
+										}}
+										min={0}
+										max={pendingToAssign + Number(item.amount || 0)}
+										placeholder={`Máx: ${pendingToAssign}`}
+										hint={
+											Number(item.amount) >
+											pendingToAssign + Number(item.amount || 0)
+												? "No puedes asignar más del restante"
+												: undefined
+										}
+									/>
 								</div>
 							);
 						})}
+
+						{/* Total asignado */}
+						<div className="flex flex-col text-sm text-first/60 text-right pt-2 border-t border-first/10">
+							<div>Total asignado: {formatUSD(totalAssigned)}</div>
+							<div>Restante por asignar: {formatUSD(pendingToAssign)}</div>
+						</div>
 					</div>
 				) : (
 					<p className="text-sm text-first/30 text-center py-4 border border-first/10 rounded-xl">

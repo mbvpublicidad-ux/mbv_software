@@ -7,7 +7,7 @@ import {
 import { DELETE_JC_PAYMENT } from "../../graphql/mutations/jcPaymentMutations";
 import { useToast } from "../../context/ToastContext";
 import Button from "../../components/ui/Button";
-import Badge from "../../components/ui/Badge";
+// import Badge from "../../components/ui/Badge";
 import { Modal, ConfirmDialog } from "../../components/ui/Modal";
 import { LoadingOverlay } from "../../components/ui/LoadingUi";
 import EmptyState from "../../components/ui/EmptyState";
@@ -73,115 +73,79 @@ const JCPaymentsManagementPage = () => {
 				</div>
 
 				{payments.length > 0 ? (
-					<div className="bg-main rounded-2xl border border-first/10 overflow-hidden">
-						<div className="overflow-x-auto">
-							<table className="w-full">
-								<thead>
-									<tr className="border-b border-first/10">
-										<th className="text-left p-4 text-xs font-medium text-first/40 uppercase">
-											Monto
-										</th>
-										<th className="text-left p-4 text-xs font-medium text-first/40 uppercase">
-											Fecha pago
-										</th>
-										<th className="text-left p-4 text-xs font-medium text-first/40 uppercase">
-											Concepto
-										</th>
-										<th className="text-left p-4 text-xs font-medium text-first/40 uppercase">
-											Autos
-										</th>
-										<th className="text-left p-4 text-xs font-medium text-first/40 uppercase">
-											Referencia
-										</th>
-										<th className="text-right p-4 text-xs font-medium text-first/40 uppercase">
-											Acciones
-										</th>
-									</tr>
-								</thead>
-								<tbody>
-									{payments.map((payment) => (
-										<tr
-											key={payment._id}
-											className="border-b border-first/5 hover:bg-first/5"
-										>
-											<td className="p-4">
-												<p className="font-semibold text-first">
-													{formatUSD(payment.amount)}
-												</p>
-											</td>
-											<td className="p-4">
-												<p className="text-sm text-first/60">
-													{formatDate(payment.actualPaymentDate)}
-												</p>
-											</td>
-											<td className="p-4">
-												<p className="text-sm text-first/70">
-													{payment.concept || "—"}
-												</p>
-											</td>
-											<td className="p-4">
-												<div className="flex flex-wrap gap-1">
-													{payment.associatedCars?.length > 0 ? (
-														payment.associatedCars.map((car) => (
-															<Badge key={car._id} size="sm" variant="neutral">
-																{car.brand?.name} {car.carModel?.name}
-															</Badge>
-														))
-													) : (
-														<span className="text-sm text-first/30">—</span>
-													)}
-												</div>
-											</td>
-											<td className="p-4">
-												<p className="text-sm text-first/50 font-mono">
-													{payment.transferReference || "—"}
-												</p>
-											</td>
-
-											<td className="p-4">
-												<div className="flex items-center justify-end gap-1">
-													{payment.updatable && (
-														<>
-															{payment.receipt && (
-																<Button
-																	iconOnly
-																	variant="ghost"
-																	size="sm"
-																	className="text-second"
-																	icon={<BsFileText className="w-3.5 h-3.5" />}
-																	onClick={() =>
-																		window.open(payment.receipt, "_blank")
-																	}
-																	title="Ver comprobante"
-																/>
-															)}
-															<Button
-																iconOnly
-																variant="ghost"
-																size="sm"
-																icon={<BsPencil className="w-3.5 h-3.5" />}
-																onClick={() => {
-																	setEditingPayment(payment);
-																	setIsFormOpen(true);
-																}}
-															/>
-															<Button
-																iconOnly
-																variant="ghost"
-																size="sm"
-																className="text-error"
-																icon={<BsTrash className="w-3.5 h-3.5" />}
-																onClick={() => setDeleteConfirm(payment._id)}
-															/>
-														</>
-													)}
-												</div>
-											</td>
-										</tr>
-									))}
-								</tbody>
-							</table>
-						</div>
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+						{payments.map((payment) => (
+							<div
+								key={payment._id}
+								className="bg-main rounded-2xl text-center border border-first/10 hover:shadow-lg hover:border-second/20 transition-all duration-200"
+							>
+								<div className="p-4">
+									<p className="text-xl font-bold text-first mb-1">
+										Pago: {formatUSD(payment.amount)}
+									</p>
+									<p className="text-sm text-first/70 truncate mb-2">
+										{payment.concept || "Sin concepto"}
+									</p>
+									{/* <div className="flex flex-col gap-2 mb-3">
+										<p className="text-xs">Autos Asociados</p>
+										{payment.associatedCars?.length > 0 ? (
+											payment.associatedCars.map((ac) => (
+												<Badge key={ac.car?._id} variant="info">
+													{ac.car?.carModel?.name} {ac.car?.vin}
+												</Badge>
+											))
+										) : (
+											<span className="text-xs text-first/30">Sin autos</span>
+										)}
+									</div> */}
+									<div className="flex items-center justify-between pt-3 border-t border-first/5">
+										<p className="text-xs text-first/40">
+											{formatDate(payment.actualPaymentDate)}
+										</p>
+										{payment.transferReference && (
+											<p className="text-xs text-first/40 font-mono truncate max-w-25">
+												Ref:{payment.transferReference}
+											</p>
+										)}
+									</div>
+								</div>
+								<div className="px-4 pb-3 flex gap-1 justify-end border-t border-first/5 pt-2">
+									{payment.updatable && (
+										<>
+											{payment.receipt && (
+												<Button
+													iconOnly
+													variant="ghost"
+													size="sm"
+													className="text-second"
+													icon={<BsFileText className="w-3.5 h-3.5" />}
+													onClick={() => window.open(payment.receipt, "_blank")}
+													title="Ver comprobante"
+												/>
+											)}
+											<Button
+												iconOnly
+												variant="ghost"
+												size="sm"
+												icon={<BsPencil className="w-3.5 h-3.5" />}
+												onClick={() => {
+													setEditingPayment(payment);
+													setIsFormOpen(true);
+												}}
+											/>
+											<Button
+												iconOnly
+												variant="ghost"
+												size="sm"
+												className="text-error"
+												icon={<BsTrash className="w-3.5 h-3.5" />}
+												onClick={() => setDeleteConfirm(payment._id)}
+											/>
+										</>
+									)}
+								</div>
+							</div>
+						))}
 					</div>
 				) : (
 					<EmptyState
