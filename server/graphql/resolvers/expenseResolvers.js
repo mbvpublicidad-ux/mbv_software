@@ -86,10 +86,6 @@ const expenseResolvers = {
 			const car = await Car.findById(input.car);
 			if (!car) throw new Error("Car not found");
 
-			if (car.availability === "Sold") {
-				throw new Error("Cannot add expenses to a sold car");
-			}
-
 			const expense = await Expense.create(input);
 
 			// Add expense to car's expenses array
@@ -128,9 +124,6 @@ const expenseResolvers = {
 			if (!expense) throw new Error("Expense not found");
 
 			const car = await Car.findById(expense.car);
-			if (car && car.availability === "Sold") {
-				throw new Error("Cannot update expenses of a sold car");
-			}
 
 			if (input.receipt === "" || input.receipt === undefined) {
 				input.receipt = null;

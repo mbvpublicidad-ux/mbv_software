@@ -7,7 +7,7 @@ const jcPaymentDefs = gql`
 		actualPaymentDate: String!
 		registrationDate: String!
 		concept: String
-		associatedCars: [Car]
+		associatedCars: [JCPaymentCar]
 		receipt: String
 		transferReference: String
 		createdBy: User!
@@ -15,11 +15,21 @@ const jcPaymentDefs = gql`
 		updatable: Boolean!
 	}
 
+	type JCPaymentCar {
+		car: Car
+		amount: Float
+	}
+
+	input JCPaymentCarInput {
+		car: ID!
+		amount: Float!
+	}
+
 	input JCPaymentInput {
 		amount: Float!
 		actualPaymentDate: String!
 		concept: String
-		associatedCars: [ID]
+		associatedCars: [JCPaymentCarInput]
 		receipt: String
 		transferReference: String
 	}
@@ -28,7 +38,7 @@ const jcPaymentDefs = gql`
 		amount: Float
 		actualPaymentDate: String
 		concept: String
-		associatedCars: [ID]
+		associatedCars: [JCPaymentCarInput]
 		receipt: String
 		transferReference: String
 	}

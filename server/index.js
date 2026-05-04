@@ -5,6 +5,7 @@ import express from "express";
 import jwt from "jsonwebtoken";
 import mongoose from "mongoose";
 import User from "./models/User.js";
+import { GraphQLError } from "graphql";
 import cookieParser from "cookie-parser";
 import cloudinary from "./config/cloudinary.js";
 import mongodbConnection from "./config/mongodb.js";

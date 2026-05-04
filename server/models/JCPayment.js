@@ -26,8 +26,14 @@ const jcPaymentSchema = new mongoose.Schema({
 	},
 	associatedCars: [
 		{
-			type: mongoose.Schema.Types.ObjectId,
-			ref: "Car",
+			car: {
+				type: mongoose.Schema.Types.ObjectId,
+				ref: "Car",
+			},
+			amount: {
+				type: Number,
+				min: 0,
+			},
 		},
 	],
 	receipt: {

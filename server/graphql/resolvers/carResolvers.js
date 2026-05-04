@@ -208,11 +208,6 @@ const carResolvers = {
 			const car = await Car.findById(id);
 			if (!car) throw new Error("Car not found");
 
-			// Block updates if car is sold
-			if (car.availability === "Sold") {
-				throw new Error("Cannot update a sold car");
-			}
-
 			// Handle logistic status changes and set corresponding dates
 			if (input.logisticStatus && input.logisticStatus !== car.logisticStatus) {
 				switch (input.logisticStatus) {
@@ -236,7 +231,11 @@ const carResolvers = {
 				if (input.availability === "Under repair" && !input.repairDate) {
 					input.repairDate = new Date().toISOString();
 				}
-				if (input.availability === "Reserved" && !car.assignedClient) {
+				if (
+					input.availability === "Reserved" &&
+					!input.assignedClient &&
+					!car.assignedClient
+				) {
 					throw new Error("Cannot reserve a car without an assigned client");
 				}
 			}
@@ -252,6 +251,25 @@ const carResolvers = {
 				.populate("expenses");
 
 			if (!updatedCar) throw new Error("Car not found");
+
+			// Si se asignó a un cliente, agregar a commissionedCars
+			if (input.owner === "Client" && input.assignedClient) {
+				await User.findByIdAndUpdate(input.assignedClient, {
+					$addToSet: { commissionedCars: id },
+				});
+			}
+
+			// Si se cambió el owner de Client a otro, remover del cliente anterior
+			if (
+				car.owner === "Client" &&
+				car.assignedClient &&
+				input.owner !== "Client"
+			) {
+				await User.findByIdAndUpdate(car.assignedClient, {
+					$pull: { commissionedCars: id },
+				});
+			}
+
 			return updatedCar;
 		},
 

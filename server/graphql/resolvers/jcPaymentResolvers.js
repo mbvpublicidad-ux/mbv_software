@@ -23,12 +23,12 @@ const jcPaymentResolvers = {
 			}
 
 			if (carId) {
-				query.associatedCars = carId;
+				query["associatedCars.car"] = carId;
 			}
 
 			let paymentsQuery = JCPayment.find(query)
 				.populate({
-					path: "associatedCars",
+					path: "associatedCars.car",
 					populate: [{ path: "brand" }, { path: "carModel" }],
 				})
 				.populate("createdBy")
@@ -48,7 +48,7 @@ const jcPaymentResolvers = {
 
 			return JCPayment.findById(id)
 				.populate({
-					path: "associatedCars",
+					path: "associatedCars.car",
 					populate: [{ path: "brand" }, { path: "carModel" }],
 				})
 				.populate("createdBy")
@@ -69,7 +69,7 @@ const jcPaymentResolvers = {
 			// Get all payments made to JC
 			const payments = await JCPayment.find({})
 				.populate({
-					path: "associatedCars",
+					path: "associatedCars.car",
 					populate: [{ path: "brand" }, { path: "carModel" }],
 				})
 				.populate("createdBy")
@@ -113,7 +113,7 @@ const jcPaymentResolvers = {
 
 			return JCPayment.findById(payment._id)
 				.populate({
-					path: "associatedCars",
+					path: "associatedCars.car",
 					populate: [{ path: "brand" }, { path: "carModel" }],
 				})
 				.populate("createdBy")
@@ -147,7 +147,7 @@ const jcPaymentResolvers = {
 				{ new: true, runValidators: true },
 			)
 				.populate({
-					path: "associatedCars",
+					path: "associatedCars.car",
 					populate: [{ path: "brand" }, { path: "carModel" }],
 				})
 				.populate("createdBy")
