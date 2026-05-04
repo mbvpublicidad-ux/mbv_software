@@ -1,7 +1,9 @@
-import ClientPayment from "../../models/ClientPayment.js";
 import Car from "../../models/Car.js";
 import User from "../../models/User.js";
+import ClientPayment from "../../models/ClientPayment.js";
 import CompanyBalance from "../../models/CompanyBalance.js";
+
+// import { notifyClientPayment } from "../../config/whatsapp.js";
 
 const clientPaymentResolvers = {
 	Query: {
@@ -96,6 +98,30 @@ const clientPaymentResolvers = {
 				car.saleDate = new Date().toISOString();
 				await car.save();
 			}
+
+			// const updatedPayment = await ClientPayment.findById(payment._id)
+			// 	.populate("client")
+			// 	.populate({
+			// 		path: "car",
+			// 		populate: [{ path: "brand" }, { path: "carModel" }],
+			// 	});
+
+			// // Notificar al cliente por WhatsApp
+			// if (client.phone) {
+			// 	const pendingBalance = Math.max(0, car.publishedPriceCRC - totalPaid);
+
+			// 	// Obtener datos poblados del auto
+			// 	const carPopulated = await Car.findById(input.car)
+			// 		.populate("brand")
+			// 		.populate("carModel");
+
+			// 	notifyClientPayment(
+			// 		client,
+			// 		carPopulated,
+			// 		input.amount,
+			// 		pendingBalance,
+			// 	).catch((err) => console.error("WhatsApp notification failed:", err));
+			// }
 
 			return ClientPayment.findById(payment._id)
 				.populate("client")

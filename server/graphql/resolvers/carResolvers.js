@@ -11,6 +11,8 @@ import {
 	extractPublicId,
 } from "../../config/cloudinary.js";
 
+import { notifyClientLogisticChange } from "../../config/whatsapp.js";
+
 import { calculateCarProfit } from "../../utils/profitCalculator.js";
 import { getCurrentExchangeRate } from "../../utils/currencyConverter.js";
 
@@ -251,6 +253,20 @@ const carResolvers = {
 				.populate("expenses");
 
 			if (!updatedCar) throw new Error("Car not found");
+
+			// Notificar al cliente por WhatsApp si cambió el estado logístico
+			if (
+				input.logisticStatus &&
+				input.logisticStatus !== car.logisticStatus &&
+				car.assignedClient
+			) {
+				const client = await User.findById(car.assignedClient);
+				if (client && client.phone) {
+					notifyClientLogisticChange(client, updatedCar).catch((err) =>
+						console.error("WhatsApp notification failed:", err),
+					);
+				}
+			}
 
 			// Si se asignó a un cliente, agregar a commissionedCars
 			if (input.owner === "Client" && input.assignedClient) {
