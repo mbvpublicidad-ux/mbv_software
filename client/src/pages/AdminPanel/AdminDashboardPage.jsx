@@ -150,6 +150,7 @@ const AdminDashboardPage = () => {
 			toast.error("Error al actualizar");
 		}
 		setUpdatingRate(false);
+		setShowExchangeModal(false);
 	};
 
 	if (loading)
