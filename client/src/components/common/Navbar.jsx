@@ -266,69 +266,72 @@ const Navbar = () => {
 						</div>
 					))}
 
-					<div className="border-t border-first/5 pt-3">
-						{isAuthenticated ? (
-							<>
-								{authLinks.map((link) => (
-									<NavLink
-										key={link.to}
-										to={link.to}
-										onClick={closeMenu}
-										className="block py-2 text-first/70 hover:text-second transition-colors"
-									>
-										{link.icon}
-									</NavLink>
-								))}
-								<button
-									onClick={handleLogout}
-									className="block py-2 text-first/70 hover:text-second transition-colors w-full text-left"
-								>
-									Cerrar sesión
-								</button>
-							</>
-						) : (
-							<NavLink to="/auth" onClick={closeMenu} className="block">
-								<Button variant="primary" size="sm" fullWidth>
-									Iniciar sesión
-								</Button>
-							</NavLink>
-						)}
-					</div>
-
 					{/* Mobile Social Icons */}
-					<div className="flex items-center gap-3 pt-3 border-t border-first/5">
-						<a
-							href={socialLinks.instagram}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-first/50 hover:text-second"
-						>
-							<BsInstagram className="w-4 h-4" />
-						</a>
-						<a
-							href={socialLinks.whatsapp}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-first/50 hover:text-second"
-						>
-							<FaWhatsapp className="w-4 h-4" />
-						</a>
-						<a
-							href={socialLinks.facebook}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-first/50 hover:text-second"
-						>
-							<BsFacebook className="w-4 h-4" />
-						</a>
-						<a
-							href={socialLinks.tiktok}
-							target="_blank"
-							rel="noopener noreferrer"
-							className="text-first/50 hover:text-second"
-						>
-							<BsTiktok className="w-4 h-4" />
-						</a>
+					<div className="flex items-center justify-between py-3 border-y border-first/5">
+						<div className="flex gap-3">
+							<a
+								href={socialLinks.instagram}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-first/50 hover:text-second"
+							>
+								<BsInstagram className="w-4 h-4" />
+							</a>
+							<a
+								href={socialLinks.whatsapp}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-first/50 hover:text-second"
+							>
+								<FaWhatsapp className="w-4 h-4" />
+							</a>
+							<a
+								href={socialLinks.facebook}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-first/50 hover:text-second"
+							>
+								<BsFacebook className="w-4 h-4" />
+							</a>
+							<a
+								href={socialLinks.tiktok}
+								target="_blank"
+								rel="noopener noreferrer"
+								className="text-first/50 hover:text-second"
+							>
+								<BsTiktok className="w-4 h-4" />
+							</a>
+						</div>
+						<div className="">
+							{isAuthenticated ? (
+								<div className="flex items-center gap-4">
+									{authLinks.map((link) => (
+										<NavLink
+											key={link.to}
+											to={link.to}
+											onClick={closeMenu}
+											className="block py-2 text-first/70 hover:text-second transition-colors"
+										>
+											{link.icon}
+										</NavLink>
+									))}
+									<Button
+										variant="danger"
+										iconOnly
+										icon={<FaSignOutAlt />}
+										size="xs"
+										rounded
+										onClick={handleLogout}
+									/>
+								</div>
+							) : (
+								<NavLink to="/auth" onClick={closeMenu} className="block">
+									<Button variant="primary" size="sm" fullWidth>
+										Iniciar sesión
+									</Button>
+								</NavLink>
+							)}
+						</div>
 					</div>
 				</div>
 			</div>

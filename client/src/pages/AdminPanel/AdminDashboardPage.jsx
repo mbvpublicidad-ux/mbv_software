@@ -10,7 +10,6 @@ import {
 	BsTruck,
 	BsBuilding,
 	BsClipboardCheck,
-	BsCurrencyDollar,
 	BsArrowRight,
 } from "react-icons/bs";
 
@@ -29,11 +28,9 @@ import { Modal } from "../../components/ui/Modal";
 import { LoadingOverlay } from "../../components/ui/LoadingUi";
 import { formatCRC, formatUSD } from "../../utils/formatters";
 
-import { useAuth } from "../../context/AuthContext";
 import { useToast } from "../../context/ToastContext";
 
 const AdminDashboardPage = () => {
-	const { user } = useAuth();
 	const { toast } = useToast();
 
 	const [showExchangeModal, setShowExchangeModal] = useState(false);
@@ -181,6 +178,23 @@ const AdminDashboardPage = () => {
 									<stat.icon className="w-5 h-5" />
 								</div>
 							</div>
+							{stat.title === "Balance actual" && (
+								<Button
+									variant="primary"
+									size="xs"
+									onClick={async () => {
+										try {
+											await recalculateBalance();
+											refetchBalance();
+										} catch (error) {
+											toast.error("Error al recalcular balance", error.message);
+										}
+									}}
+									className="mt-3"
+								>
+									Recalcular balance
+								</Button>
+							)}
 							{stat.link && (
 								<Link
 									to={stat.link}
@@ -299,7 +313,7 @@ const AdminDashboardPage = () => {
 				</div>
 
 				{/* Financial Summary */}
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 					{/* Company Balance */}
 					<div className="bg-main rounded-2xl border border-first/10 p-6">
 						<h2 className="text-lg font-semibold text-first mb-4">
@@ -380,106 +394,52 @@ const AdminDashboardPage = () => {
 							Ver pagos <BsArrowRight className="w-3 h-3" />
 						</Link>
 					</div>
+				</div>
+				{/* Modal para actualizar tipo de cambio */}
+				<Modal
+					isOpen={showExchangeModal}
+					onClose={() => setShowExchangeModal(false)}
+					title="Configuración de Balance"
+					size="sm"
+				>
+					<div className="space-y-4">
+						<div>
+							<p className="text-sm text-first/50 mb-1">
+								Tipo de cambio actual
+							</p>
+							<p className="text-xl font-bold text-first">
+								{formatCRC(exchangeRate)} por USD
+							</p>
+						</div>
+						<Input
+							label="Nuevo valor (CRC por USD)"
+							type="number"
+							value={newExchangeRate}
+							onChange={(e) => setNewExchangeRate(e.target.value)}
+							placeholder="Ej: 540"
+							min={0}
+							size="md"
+						/>
+						<Button
+							onClick={handleUpdateRate}
+							loading={updatingRate}
+							disabled={!newExchangeRate || Number(newExchangeRate) <= 0}
+							size="sm"
+							fullWidth
+						>
+							Actualizar tipo de cambio
+						</Button>
 
-					{/* Quick Actions */}
-					<div className="bg-main rounded-2xl border border-first/10 p-6">
-						<h2 className="text-lg font-semibold text-first mb-4">
-							Acciones Rápidas
-						</h2>
-						<div className="space-y-2">
-							{user?.role === "superadmin" && (
-								<Button
-									variant="secondary"
-									size="sm"
-									onClick={async () => {
-										try {
-											await recalculateBalance();
-											refetchBalance();
-										} catch (error) {
-											toast.error("Error al recalcular balance", error.message);
-										}
-									}}
-								>
-									Recalcular balance
-								</Button>
-							)}
-							<Link
-								to="/admin/cars"
-								className="flex items-center gap-2 w-full text-left px-4 py-3 rounded-xl bg-first/5 hover:bg-first/10 text-sm text-first transition-colors"
+						<div className="flex justify-end pt-2">
+							<Button
+								variant="ghost"
+								onClick={() => setShowExchangeModal(false)}
 							>
-								<BsCarFront className="w-4 h-4" />
-								Gestionar vehículos
-							</Link>
-							<Link
-								to="/admin/expenses"
-								className="flex items-center gap-2 w-full text-left px-4 py-3 rounded-xl bg-first/5 hover:bg-first/10 text-sm text-first transition-colors"
-							>
-								<BsCurrencyDollar className="w-4 h-4" />
-								Registrar Gastos de autos
-							</Link>
-							<Link
-								to="/admin/general-expenses"
-								className="flex items-center gap-2 w-full text-left px-4 py-3 rounded-xl bg-first/5 hover:bg-first/10 text-sm text-first transition-colors"
-							>
-								<BsCurrencyDollar className="w-4 h-4" />
-								Registrar Gastos generales
-							</Link>
-							<Link
-								to="/admin/reports"
-								className="flex items-center gap-2 w-full text-left px-4 py-3 rounded-xl bg-first/5 hover:bg-first/10 text-sm text-first transition-colors"
-							>
-								<BsClipboardCheck className="w-4 h-4" />
-								Reporte contable
-							</Link>
+								Cerrar
+							</Button>
 						</div>
 					</div>
-
-					{/* Modal para actualizar tipo de cambio */}
-					<Modal
-						isOpen={showExchangeModal}
-						onClose={() => setShowExchangeModal(false)}
-						title="Configuración de Balance"
-						size="sm"
-					>
-						<div className="space-y-4">
-							<div>
-								<p className="text-sm text-first/50 mb-1">
-									Tipo de cambio actual
-								</p>
-								<p className="text-xl font-bold text-first">
-									{formatCRC(exchangeRate)} por USD
-								</p>
-							</div>
-							<Input
-								label="Nuevo valor (CRC por USD)"
-								type="number"
-								value={newExchangeRate}
-								onChange={(e) => setNewExchangeRate(e.target.value)}
-								placeholder="Ej: 540"
-								min={0}
-								size="md"
-							/>
-							<Button
-								onClick={handleUpdateRate}
-								loading={updatingRate}
-								disabled={!newExchangeRate || Number(newExchangeRate) <= 0}
-								size="sm"
-								fullWidth
-							>
-								Actualizar tipo de cambio
-							</Button>
-
-							<div className="flex justify-end pt-2">
-								<Button
-									variant="ghost"
-									onClick={() => setShowExchangeModal(false)}
-								>
-									Cerrar
-								</Button>
-							</div>
-						</div>
-					</Modal>
-				</div>
+				</Modal>
 			</div>
 		</div>
 	);

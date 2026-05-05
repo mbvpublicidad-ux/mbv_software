@@ -154,7 +154,7 @@ const CarDetail = () => {
 				</button>
 
 				{/* Header */}
-				<div className="flex flex-col lg:flex-row gap-8">
+				<div className="flex flex-col lg:flex-row gap-5">
 					{/* Image Gallery */}
 					{car.images && car.images.length > 0 && (
 						<div className="lg:w-3/5">
@@ -164,7 +164,7 @@ const CarDetail = () => {
 
 					{/* Details */}
 					<div
-						className={`${car.images && car.images.length > 0 ? "lg:w-2/5" : "lg:w-full"} space-y-6`}
+						className={`${car.images && car.images.length > 0 ? "lg:w-2/5" : "lg:w-full"} space-y-4`}
 					>
 						{/* Title & Status */}
 						<div>
@@ -222,30 +222,37 @@ const CarDetail = () => {
 							>
 								Compartir
 							</Button>
-
-							{isAdmin && (
-								<>
-									<Button
-										variant="primary"
-										size="sm"
-										onClick={copyCarDetails}
-										icon={<BsClipboard className="w-4 h-4" />}
-									>
-										Copiar detalles
-									</Button>
-									<Button
-										variant="primary"
-										size="lg"
-										fullWidth
-										onClick={() => setShowSimulator(!showSimulator)}
-									>
-										{showSimulator
-											? "Ocultar simulador"
-											: "Simulador de ganancia"}
-									</Button>
-								</>
-							)}
 						</div>
+
+						{isAdmin && (
+							<div className="flex gap-2">
+								<Button
+									variant="primary"
+									size="sm"
+									onClick={copyCarDetails}
+									icon={<BsClipboard className="w-4 h-4" />}
+								>
+									Copiar detalles
+								</Button>
+								<Button
+									variant="primary"
+									size="lg"
+									fullWidth
+									onClick={() => setShowSimulator(!showSimulator)}
+								>
+									{showSimulator
+										? "Ocultar simulador"
+										: "Simulador de ganancia"}
+								</Button>
+							</div>
+						)}
+
+						{/* Profit Simulator Modal */}
+						{showSimulator && isAdmin && (
+							<div className="mt-8">
+								<ProfitSimulator car={car} />
+							</div>
+						)}
 
 						{/* Specs Grid */}
 						<div className="grid grid-cols-2 gap-3">
@@ -286,8 +293,12 @@ const CarDetail = () => {
 								<div className="grid grid-cols-2 gap-2 text-sm">
 									<p className="text-first/40">VIN</p>
 									<p className="text-first font-mono">{car.vin}</p>
-									<p className="text-first/40">DUA</p>
-									<p className="text-first font-mono">{car.dua}</p>
+									{car?.dua && (
+										<>
+											<p className="text-first/40">DUA</p>
+											<p className="text-first font-mono">{car.dua}</p>
+										</>
+									)}
 									<p className="text-first/40">Compra USA</p>
 									<p className="text-first">{formatDate(car.purchaseDate)}</p>
 									<p className="text-first/40">Valor compra</p>
@@ -357,13 +368,6 @@ const CarDetail = () => {
 						)}
 					</div>
 				</div>
-
-				{/* Profit Simulator Modal */}
-				{showSimulator && isAdmin && (
-					<div className="mt-8">
-						<ProfitSimulator car={car} />
-					</div>
-				)}
 			</div>
 		</div>
 	);
