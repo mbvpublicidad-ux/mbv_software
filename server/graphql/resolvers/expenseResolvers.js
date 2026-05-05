@@ -1,7 +1,7 @@
 import CompanyBalance from "../../models/CompanyBalance.js";
 import Expense from "../../models/Expense.js";
 import Car from "../../models/Car.js";
-import { updateBalance } from "../../utils/currencyConverter.js";
+import { processBalanceUpdate } from "../../utils/currencyConverter.js";
 
 const expenseResolvers = {
 	Query: {

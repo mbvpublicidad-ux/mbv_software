@@ -1,6 +1,6 @@
 import GeneralExpense from "../../models/GeneralExpense.js";
 import CompanyBalance from "../../models/CompanyBalance.js";
-import { updateBalance } from "../../utils/currencyConverter.js";
+import { processBalanceUpdate } from "../../utils/currencyConverter.js";
 
 const generalExpenseResolvers = {
 	Query: {

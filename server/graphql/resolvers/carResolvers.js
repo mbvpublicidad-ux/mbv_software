@@ -14,7 +14,7 @@ import {
 import { notifyClientLogisticChange } from "../../config/whatsapp.js";
 
 import { calculateCarProfit } from "../../utils/profitCalculator.js";
-import { updateBalance } from "../../utils/currencyConverter.js";
+import { processBalanceUpdate } from "../../utils/currencyConverter.js";
 
 const carResolvers = {
 	Query: {
@@ -175,7 +175,7 @@ const carResolvers = {
 					isFromJuanCarlos: false,
 				});
 				for (const exp of allExpenses) {
-					await updateBalance(
+					await processBalanceUpdate(
 						balance,
 						exp.amount,
 						exp.currency,
