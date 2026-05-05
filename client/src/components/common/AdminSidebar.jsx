@@ -14,6 +14,7 @@ import {
 	BsX,
 	BsCurrencyDollar,
 	BsBoxArrowRight,
+	BsCalculator,
 } from "react-icons/bs";
 
 const menuItems = [
@@ -62,6 +63,11 @@ const menuItems = [
 	},
 	{
 		divider: true,
+	},
+	{
+		to: "/admin/calculator",
+		icon: BsCalculator,
+		label: "Calculadora",
 	},
 	{
 		to: "/admin/reports",

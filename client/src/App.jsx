@@ -11,6 +11,7 @@ import TokenWatcher from "./routes/TokenWatcher";
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import { LoadingOverlay } from "./components/ui/LoadingUi";
 import AdminLayout from "./components/common/AdminLayout";
+import ImportCalculatorPage from "./pages/AdminPanel/ImportCalculatorPage";
 
 // Lazy loaded pages
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -142,6 +143,10 @@ const App = () => {
 								<Route
 									path="/admin/reports"
 									element={<AccountingReportPage />}
+								/>
+								<Route
+									path="/admin/calculator"
+									element={<ImportCalculatorPage />}
 								/>
 							</Route>
 						</Route>
