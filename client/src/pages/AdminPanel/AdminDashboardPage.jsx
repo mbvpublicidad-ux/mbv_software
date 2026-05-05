@@ -82,7 +82,9 @@ const AdminDashboardPage = () => {
 		(c) => c.logisticStatus === "Dekra pending",
 	).length;
 	const availableForSale = cars.filter(
-		(c) => c.logisticStatus === "Available for direct sale",
+		(c) =>
+			c.logisticStatus === "Available for direct sale" &&
+			c.availability === "Available",
 	).length;
 
 	const totalSalesValue = cars
