@@ -47,7 +47,7 @@ const ClientPaymentsManagementPage = () => {
 		data: paymentsData,
 		loading,
 		refetch,
-	} = useQuery(GET_CLIENT_PAYMENTS, { fetchPolicy: "cache-and-network" });
+	} = useQuery(GET_CLIENT_PAYMENTS);
 	const { data: clientsData } = useQuery(GET_CLIENTS);
 
 	const [createClientPayment] = useMutation(CREATE_CLIENT_PAYMENT);
