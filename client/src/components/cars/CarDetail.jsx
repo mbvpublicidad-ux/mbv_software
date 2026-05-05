@@ -226,7 +226,7 @@ const CarDetail = () => {
 							{isAdmin && (
 								<>
 									<Button
-										variant="ghost"
+										variant="primary"
 										size="sm"
 										onClick={copyCarDetails}
 										icon={<BsClipboard className="w-4 h-4" />}
