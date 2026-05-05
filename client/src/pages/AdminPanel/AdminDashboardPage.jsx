@@ -42,14 +42,18 @@ const AdminDashboardPage = () => {
 	});
 
 	const { data: clientsData, loading: clientsLoading } = useQuery(GET_CLIENTS);
+
 	const {
 		data: balanceData,
 		loading: balanceLoading,
 		refetch: refetchBalance,
 	} = useQuery(GET_COMPANY_BALANCE);
+
 	const { data: jcDebtData, loading: jcDebtLoading } =
 		useQuery(GET_JC_DEBT_SUMMARY);
-	const { data: exchangeData } = useQuery(GET_EXCHANGE_RATE);
+
+	const { data: exchangeData, refetch: refetchExchange } =
+		useQuery(GET_EXCHANGE_RATE);
 
 	const [updateExchangeRate] = useMutation(UPDATE_EXCHANGE_RATE);
 	const [recalculateBalance] = useMutation(RECALCULATE_BALANCE);
@@ -138,9 +142,12 @@ const AdminDashboardPage = () => {
 			await updateExchangeRate({
 				variables: { value: Number(newExchangeRate) },
 			});
-			refetchBalance(); // Recargar para actualizar todas las queries
+			refetchExchange();
+			refetchBalance();
+			toast.success("Tipo de cambio actualizado");
 		} catch (error) {
 			console.error(error);
+			toast.error("Error al actualizar");
 		}
 		setUpdatingRate(false);
 	};
