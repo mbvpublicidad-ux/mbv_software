@@ -11,6 +11,12 @@ const generalExpenseSchema = new mongoose.Schema({
 		required: [true, "El monto es requerido"],
 		min: 0,
 	},
+	convertedAmount: {
+		type: Number,
+	},
+	exchangeRateUsed: {
+		type: Number,
+	},
 	paidFrom: {
 		type: String,
 		enum: ["CRC", "USD", null],

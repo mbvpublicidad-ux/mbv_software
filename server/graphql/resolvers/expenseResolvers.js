@@ -96,15 +96,21 @@ const expenseResolvers = {
 			if (!input.isFromJuanCarlos) {
 				const balance = await CompanyBalance.findOne();
 				if (balance) {
-					await updateBalance(
-						balance,
-						input.amount,
-						input.currency,
-						input.paidFrom,
-					);
+					const { convertedAmount, exchangeRateUsed } =
+						await processBalanceUpdate(
+							balance,
+							input.amount,
+							input.currency,
+							input.paidFrom,
+						);
 					balance.lastUpdated = new Date();
 					balance.updatedBy = user._id;
 					await balance.save();
+
+					// Guardar en el expense
+					expense.convertedAmount = convertedAmount;
+					expense.exchangeRateUsed = exchangeRateUsed;
+					await expense.save();
 				}
 			}
 
@@ -131,24 +137,28 @@ const expenseResolvers = {
 			if (!expense.isFromJuanCarlos) {
 				const balance = await CompanyBalance.findOne();
 				if (balance) {
-					// Revertir el gasto anterior
-					await updateBalance(
+					// Revertir
+					await processBalanceUpdate(
 						balance,
 						expense.amount,
 						expense.currency,
 						expense.paidFrom,
 						true,
 					);
-					// Aplicar el nuevo gasto
-					await updateBalance(
-						balance,
-						input.amount || expense.amount,
-						input.currency || expense.currency,
-						input.paidFrom !== undefined ? input.paidFrom : expense.paidFrom,
-					);
+					// Aplicar nuevo
+					const { convertedAmount, exchangeRateUsed } =
+						await processBalanceUpdate(
+							balance,
+							input.amount || expense.amount,
+							input.currency || expense.currency,
+							input.paidFrom !== undefined ? input.paidFrom : expense.paidFrom,
+						);
 					balance.lastUpdated = new Date();
 					balance.updatedBy = user._id;
 					await balance.save();
+
+					expense.convertedAmount = convertedAmount;
+					expense.exchangeRateUsed = exchangeRateUsed;
 				}
 			}
 
@@ -173,9 +183,6 @@ const expenseResolvers = {
 			if (!expense) throw new Error("Expense not found");
 
 			const car = await Car.findById(expense.car);
-			if (car && car.availability === "Sold") {
-				throw new Error("Cannot delete expenses from a sold car");
-			}
 
 			// Remove expense reference from car
 			if (car) {
@@ -188,7 +195,7 @@ const expenseResolvers = {
 			if (!expense.isFromJuanCarlos) {
 				const balance = await CompanyBalance.findOne();
 				if (balance) {
-					await updateBalance(
+					await processBalanceUpdate(
 						balance,
 						expense.amount,
 						expense.currency,

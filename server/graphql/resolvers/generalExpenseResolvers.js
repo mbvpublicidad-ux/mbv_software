@@ -49,15 +49,20 @@ const generalExpenseResolvers = {
 			// Update CompanyBalance - reduce balance
 			const balance = await CompanyBalance.findOne();
 			if (balance) {
-				await updateBalance(
-					balance,
-					input.amount,
-					input.currency,
-					input.paidFrom,
-				);
+				const { convertedAmount, exchangeRateUsed } =
+					await processBalanceUpdate(
+						balance,
+						input.amount,
+						input.currency,
+						input.paidFrom,
+					);
 				balance.lastUpdated = new Date();
 				balance.updatedBy = user._id;
 				await balance.save();
+
+				expense.convertedAmount = convertedAmount;
+				expense.exchangeRateUsed = exchangeRateUsed;
+				await expense.save();
 			}
 
 			return expense;
@@ -77,24 +82,33 @@ const generalExpenseResolvers = {
 
 			const balance = await CompanyBalance.findOne();
 			if (balance) {
-				// Revertir el gasto anterior
-				await updateBalance(
+				// Revertir
+				await processBalanceUpdate(
 					balance,
 					expense.amount,
 					expense.currency,
 					expense.paidFrom,
 					true,
 				);
-				// Aplicar el nuevo gasto
-				await updateBalance(
-					balance,
-					input.amount || expense.amount,
-					input.currency || expense.currency,
-					input.paidFrom !== undefined ? input.paidFrom : expense.paidFrom,
-				);
+				// Aplicar nuevo
+				const newAmount = input.amount || expense.amount;
+				const newCurrency = input.currency || expense.currency;
+				const newPaidFrom =
+					input.paidFrom !== undefined ? input.paidFrom : expense.paidFrom;
+
+				const { convertedAmount, exchangeRateUsed } =
+					await processBalanceUpdate(
+						balance,
+						newAmount,
+						newCurrency,
+						newPaidFrom,
+					);
 				balance.lastUpdated = new Date();
 				balance.updatedBy = user._id;
 				await balance.save();
+
+				input.convertedAmount = convertedAmount;
+				input.exchangeRateUsed = exchangeRateUsed;
 			}
 
 			const updatedExpense = await GeneralExpense.findByIdAndUpdate(
@@ -118,7 +132,7 @@ const generalExpenseResolvers = {
 			// Reembolsar al balance
 			const balance = await CompanyBalance.findOne();
 			if (balance) {
-				await updateBalance(
+				await processBalanceUpdate(
 					balance,
 					expense.amount,
 					expense.currency,

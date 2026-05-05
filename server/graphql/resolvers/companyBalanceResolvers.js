@@ -116,10 +116,11 @@ const companyBalanceResolvers = {
 			let totalExpensesCRC = 0;
 			let totalExpensesUSD = 0;
 			for (const exp of expenses) {
-				if (exp.currency === "CRC") {
-					totalExpensesCRC += exp.amount;
+				const account = exp.paidFrom || exp.currency;
+				if (account === "CRC") {
+					totalExpensesCRC += exp.convertedAmount || exp.amount;
 				} else {
-					totalExpensesUSD += exp.amount;
+					totalExpensesUSD += exp.convertedAmount || exp.amount;
 				}
 			}
 
@@ -128,10 +129,11 @@ const companyBalanceResolvers = {
 			let totalGeneralCRC = 0;
 			let totalGeneralUSD = 0;
 			for (const exp of generalExpenses) {
-				if (exp.currency === "CRC") {
-					totalGeneralCRC += exp.amount;
+				const account = exp.paidFrom || exp.currency;
+				if (account === "CRC") {
+					totalGeneralCRC += exp.convertedAmount || exp.amount;
 				} else {
-					totalGeneralUSD += exp.amount;
+					totalGeneralUSD += exp.convertedAmount || exp.amount;
 				}
 			}
 
