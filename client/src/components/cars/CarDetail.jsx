@@ -5,6 +5,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import { GET_CAR } from "../../graphql/queries/carQueries";
 
 import { useAuth } from "../../context/AuthContext";
+import { useToast } from "../../context/ToastContext";
 import { useWhatsApp } from "../../context/WhatsAppContext";
 
 import ImageGallery from "./ImageGallery";
@@ -12,8 +13,8 @@ import ProfitSimulator from "./ProfitSimulator";
 
 import Button from "../ui/Button";
 import Badge from "../ui/Badge";
-import { LoadingOverlay } from "../ui/LoadingUi";
 import ErrorMessage from "../ui/ErrorMessage";
+import { LoadingOverlay } from "../ui/LoadingUi";
 
 import {
 	BsArrowLeft,
@@ -24,6 +25,7 @@ import {
 	BsPalette,
 	BsCalendar,
 	BsFileText,
+	BsClipboard,
 } from "react-icons/bs";
 
 import {
@@ -41,9 +43,14 @@ import { GET_EXCHANGE_RATE } from "../../graphql/queries/exchangeRateQueries";
 
 const CarDetail = () => {
 	const { id } = useParams();
+
 	const navigate = useNavigate();
+
 	const { user } = useAuth();
+	const { toast } = useToast();
+
 	const { sendWhatsAppInquiry, shareVehicle } = useWhatsApp();
+
 	const [showSimulator, setShowSimulator] = useState(false);
 
 	const isAdmin = user?.role === "admin" || user?.role === "superadmin";
@@ -109,6 +116,30 @@ const CarDetail = () => {
 		},
 		{ icon: BsFileText, label: "Motor", value: car.engine },
 	];
+
+	const copyCarDetails = async () => {
+		const details = [
+			`${car.brand?.name} ${car.carModel?.name} ${car.year}`,
+			`Precio: ${formatCRC(car.publishedPriceCRC)}`,
+			`Millaje: ${formatMileage(car.adjustedMileage || car.actualMileage)}`,
+			`Motor: ${car.engine}`,
+			`Transmisión: ${getDetailsTranslation("transmission", car.transmission)}`,
+			`Tracción: ${getDetailsTranslation("drivetrain", car.drivetrain)}`,
+			`Combustible: ${getDetailsTranslation("fuelType", car.fuelType)}`,
+			`Color: ${car.color}`,
+			`Carrocería: ${getDetailsTranslation("bodyType", car.bodyType)}`,
+			car.description ? `Descripción: ${car.description}` : null,
+		]
+			.filter(Boolean)
+			.join("\n");
+
+		try {
+			await navigator.clipboard.writeText(details);
+			toast.success("Detalles copiados al portapapeles");
+		} catch {
+			toast.error("Error al copiar");
+		}
+	};
 
 	return (
 		<div className="min-h-screen pt-20 pb-16">
@@ -191,17 +222,28 @@ const CarDetail = () => {
 							>
 								Compartir
 							</Button>
+
 							{isAdmin && (
-								<Button
-									variant="primary"
-									size="lg"
-									fullWidth
-									onClick={() => setShowSimulator(!showSimulator)}
-								>
-									{showSimulator
-										? "Ocultar simulador"
-										: "Simulador de ganancia"}
-								</Button>
+								<>
+									<Button
+										variant="ghost"
+										size="sm"
+										onClick={copyCarDetails}
+										icon={<BsClipboard className="w-4 h-4" />}
+									>
+										Copiar detalles
+									</Button>
+									<Button
+										variant="primary"
+										size="lg"
+										fullWidth
+										onClick={() => setShowSimulator(!showSimulator)}
+									>
+										{showSimulator
+											? "Ocultar simulador"
+											: "Simulador de ganancia"}
+									</Button>
+								</>
 							)}
 						</div>
 
