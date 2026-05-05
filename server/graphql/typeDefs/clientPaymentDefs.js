@@ -4,7 +4,7 @@ const clientPaymentDefs = gql`
 	type ClientPayment {
 		_id: ID!
 		client: User!
-		car: Car!
+		car: Car
 		amount: Float!
 		currency: String
 		paymentDate: String!
@@ -17,7 +17,7 @@ const clientPaymentDefs = gql`
 
 	input ClientPaymentInput {
 		client: ID!
-		car: ID!
+		car: ID
 		amount: Float!
 		currency: String
 		paymentDate: String!
