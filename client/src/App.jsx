@@ -1,6 +1,8 @@
 import { Routes, Route, useLocation } from "react-router-dom";
 import { lazy, Suspense } from "react";
 
+import { Toaster } from "react-hot-toast";
+
 // Common components
 import Navbar from "./components/common/Navbar";
 import Footer from "./components/common/Footer";
@@ -64,10 +66,20 @@ const App = () => {
 
 	return (
 		<div className="min-h-screen bg-main text-first">
+			<Toaster
+				position="bottom-right"
+				toastOptions={{
+					duration: 4000,
+					style: {
+						background: "var(--color-main)",
+						color: "var(--color-first)",
+						borderRadius: "12px",
+					},
+				}}
+			/>
 			<ScrollToTop />
 			<TokenWatcher />
 			{!isAdminRoute && <Navbar />}
-
 			<main className="min-h-screen">
 				<Suspense fallback={<SuspenseFallback />}>
 					<Routes>
@@ -144,7 +156,6 @@ const App = () => {
 					</Routes>
 				</Suspense>
 			</main>
-
 			{!isAdminRoute && <Footer />}
 		</div>
 	);

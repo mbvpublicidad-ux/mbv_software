@@ -37,6 +37,11 @@ const expenseSchema = new mongoose.Schema({
 		required: [true, "El monto es requerido"],
 		min: 0,
 	},
+	paidFrom: {
+		type: String,
+		enum: ["CRC", "USD", null],
+		default: null,
+	},
 	currency: {
 		type: String,
 		required: [true, "La moneda es requerida"],

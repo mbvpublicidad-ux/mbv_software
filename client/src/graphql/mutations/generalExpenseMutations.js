@@ -6,6 +6,7 @@ export const CREATE_GENERAL_EXPENSE = gql`
 			_id
 			concept
 			amount
+			paidFrom
 			currency
 			expenseDate
 			receipt
@@ -21,6 +22,7 @@ export const UPDATE_GENERAL_EXPENSE = gql`
 			_id
 			concept
 			amount
+			paidFrom
 			currency
 			expenseDate
 			description

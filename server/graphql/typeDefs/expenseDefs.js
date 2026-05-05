@@ -7,6 +7,7 @@ const expenseDefs = gql`
 		type: String!
 		description: String
 		amount: Float!
+		paidFrom: String
 		currency: String!
 		expenseDate: String!
 		receipt: String
@@ -19,6 +20,7 @@ const expenseDefs = gql`
 		type: String!
 		description: String
 		amount: Float!
+		paidFrom: String
 		currency: String!
 		expenseDate: String!
 		receipt: String
@@ -29,6 +31,7 @@ const expenseDefs = gql`
 		type: String
 		description: String
 		amount: Float
+		paidFrom: String
 		currency: String
 		expenseDate: String
 		receipt: String

@@ -86,7 +86,11 @@ const clientPaymentResolvers = {
 			const balance = await CompanyBalance.findOne();
 
 			if (balance) {
-				balance.currentBalance += input.amount;
+				if (input.currency === "USD") {
+					balance.currentBalanceUSD += input.amount;
+				} else {
+					balance.currentBalanceCRC += input.amount;
+				}
 				balance.lastUpdated = new Date();
 				balance.updatedBy = user._id;
 				await balance.save();
@@ -141,6 +145,32 @@ const clientPaymentResolvers = {
 				input.receipt = null;
 			}
 
+			const balance = await CompanyBalance.findOne();
+			if (balance) {
+				const payment = await ClientPayment.findById(id);
+				if (!payment) throw new Error("Payment not found");
+
+				// Revertir el pago anterior
+				if (payment.currency === "USD") {
+					balance.currentBalanceUSD -= payment.amount;
+				} else {
+					balance.currentBalanceCRC -= payment.amount;
+				}
+
+				// Aplicar el nuevo pago
+				const newAmount = input.amount || payment.amount;
+				const newCurrency = input.currency || payment.currency;
+				if (newCurrency === "USD") {
+					balance.currentBalanceUSD += newAmount;
+				} else {
+					balance.currentBalanceCRC += newAmount;
+				}
+
+				balance.lastUpdated = new Date();
+				balance.updatedBy = user._id;
+				await balance.save();
+			}
+
 			const updatedPayment = await ClientPayment.findByIdAndUpdate(
 				id,
 				{ $set: input },
@@ -167,7 +197,11 @@ const clientPaymentResolvers = {
 			// Descontar del balance
 			const balance = await CompanyBalance.findOne();
 			if (balance) {
-				balance.currentBalance -= payment.amount;
+				if (payment.currency === "USD") {
+					balance.currentBalanceUSD -= payment.amount;
+				} else {
+					balance.currentBalanceCRC -= payment.amount;
+				}
 				balance.lastUpdated = new Date();
 				balance.updatedBy = user._id;
 				await balance.save();

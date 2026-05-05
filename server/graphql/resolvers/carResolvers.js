@@ -14,7 +14,7 @@ import {
 import { notifyClientLogisticChange } from "../../config/whatsapp.js";
 
 import { calculateCarProfit } from "../../utils/profitCalculator.js";
-import { getCurrentExchangeRate } from "../../utils/currencyConverter.js";
+import { updateBalance } from "../../utils/currencyConverter.js";
 
 const carResolvers = {
 	Query: {
@@ -174,15 +174,14 @@ const carResolvers = {
 					car: car._id,
 					isFromJuanCarlos: false,
 				});
-				let totalCRC = 0;
-				const rate = await getCurrentExchangeRate();
-
 				for (const exp of allExpenses) {
-					if (exp.currency === "CRC") totalCRC += exp.amount;
-					else totalCRC += exp.amount * rate;
+					await updateBalance(
+						balance,
+						exp.amount,
+						exp.currency,
+						exp.paidFrom || exp.currency,
+					);
 				}
-
-				balance.currentBalance -= totalCRC;
 				balance.lastUpdated = new Date();
 				balance.updatedBy = user._id;
 				await balance.save();
@@ -378,7 +377,7 @@ const carResolvers = {
 
 			const balance = await CompanyBalance.findOne();
 			if (balance) {
-				balance.currentBalance += finalSalePriceCRC;
+				balance.currentBalanceCRC += finalSalePriceCRC;
 				balance.lastUpdated = new Date();
 				balance.updatedBy = user._id;
 				await balance.save();

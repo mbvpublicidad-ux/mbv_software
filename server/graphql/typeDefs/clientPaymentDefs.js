@@ -6,6 +6,7 @@ const clientPaymentDefs = gql`
 		client: User!
 		car: Car!
 		amount: Float!
+		currency: String
 		paymentDate: String!
 		paymentMethod: String
 		pendingBalance: Float
@@ -18,6 +19,7 @@ const clientPaymentDefs = gql`
 		client: ID!
 		car: ID!
 		amount: Float!
+		currency: String
 		paymentDate: String!
 		paymentMethod: String
 		pendingBalance: Float

@@ -16,6 +16,11 @@ const clientPaymentSchema = new mongoose.Schema({
 		required: [true, "El monto es requerido"],
 		min: 0,
 	},
+	currency: {
+		type: String,
+		enum: ["CRC", "USD"],
+		default: "CRC",
+	},
 	paymentDate: {
 		type: Date,
 		required: [true, "La fecha del pago es requerida"],

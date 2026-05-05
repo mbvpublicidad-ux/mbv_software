@@ -16,6 +16,7 @@ export const GET_EXPENSES = gql`
 				year
 				vin
 			}
+			paidFrom
 			type
 			description
 			amount
@@ -42,6 +43,7 @@ export const GET_EXPENSE = gql`
 				}
 				year
 			}
+			paidFrom
 			type
 			description
 			amount

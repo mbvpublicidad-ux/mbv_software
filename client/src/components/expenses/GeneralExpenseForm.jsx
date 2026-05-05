@@ -13,6 +13,7 @@ import ImageUploader from "../cars/ImageUploader";
 const initialFormData = {
 	concept: "",
 	amount: "",
+	paidFrom: "",
 	currency: "CRC",
 	expenseDate: new Date().toISOString().split("T")[0],
 	description: "",
@@ -28,6 +29,7 @@ const GeneralExpenseForm = ({ expense, onClose, onSuccess }) => {
 				concept: expense.concept || "",
 				amount: expense.amount?.toString() || "",
 				currency: expense.currency || "CRC",
+				paidFrom: expense.paidFrom || expense.currency || "",
 				expenseDate: expense.expenseDate
 					? expense.expenseDate.split("T")[0]
 					: new Date().toISOString().split("T")[0],
@@ -80,6 +82,7 @@ const GeneralExpenseForm = ({ expense, onClose, onSuccess }) => {
 			input: {
 				concept: formData.concept.trim(),
 				amount: Number(formData.amount),
+				paidFrom: formData.paidFrom || undefined,
 				currency: formData.currency,
 				expenseDate: formData.expenseDate,
 				description: formData.description.trim() || undefined,
@@ -133,6 +136,16 @@ const GeneralExpenseForm = ({ expense, onClose, onSuccess }) => {
 					value={formData.currency}
 					onChange={(e) => handleChange("currency", e.target.value)}
 					size="sm"
+				/>
+				<Select
+					label="Pagado desde"
+					size="sm"
+					options={[
+						{ value: "CRC", label: "CRC - Colones" },
+						{ value: "USD", label: "USD - Dólares" },
+					]}
+					value={formData.paidFrom || formData.currency}
+					onChange={(e) => handleChange("paidFrom", e.target.value)}
 				/>
 			</div>
 			<Input

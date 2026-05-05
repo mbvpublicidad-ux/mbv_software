@@ -1,8 +1,7 @@
 import CompanyBalance from "../../models/CompanyBalance.js";
 import Expense from "../../models/Expense.js";
 import Car from "../../models/Car.js";
-
-import { getCurrentExchangeRate } from "../../utils/currencyConverter.js";
+import { updateBalance } from "../../utils/currencyConverter.js";
 
 const expenseResolvers = {
 	Query: {
@@ -97,12 +96,12 @@ const expenseResolvers = {
 			if (!input.isFromJuanCarlos) {
 				const balance = await CompanyBalance.findOne();
 				if (balance) {
-					if (input.currency === "CRC") {
-						balance.currentBalance -= input.amount;
-					} else {
-						const rate = await getCurrentExchangeRate();
-						balance.currentBalance -= input.amount * rate;
-					}
+					await updateBalance(
+						balance,
+						input.amount,
+						input.currency,
+						input.paidFrom,
+					);
 					balance.lastUpdated = new Date();
 					balance.updatedBy = user._id;
 					await balance.save();
@@ -127,6 +126,30 @@ const expenseResolvers = {
 
 			if (input.receipt === "" || input.receipt === undefined) {
 				input.receipt = null;
+			}
+
+			if (!expense.isFromJuanCarlos) {
+				const balance = await CompanyBalance.findOne();
+				if (balance) {
+					// Revertir el gasto anterior
+					await updateBalance(
+						balance,
+						expense.amount,
+						expense.currency,
+						expense.paidFrom,
+						true,
+					);
+					// Aplicar el nuevo gasto
+					await updateBalance(
+						balance,
+						input.amount || expense.amount,
+						input.currency || expense.currency,
+						input.paidFrom !== undefined ? input.paidFrom : expense.paidFrom,
+					);
+					balance.lastUpdated = new Date();
+					balance.updatedBy = user._id;
+					await balance.save();
+				}
 			}
 
 			const updatedExpense = await Expense.findByIdAndUpdate(
@@ -165,14 +188,13 @@ const expenseResolvers = {
 			if (!expense.isFromJuanCarlos) {
 				const balance = await CompanyBalance.findOne();
 				if (balance) {
-					if (expense.currency === "CRC") {
-						balance.currentBalance += expense.amount;
-					} else {
-						const { getCurrentExchangeRate } =
-							await import("../../utils/currencyConverter.js");
-						const rate = await getCurrentExchangeRate();
-						balance.currentBalance += expense.amount * rate;
-					}
+					await updateBalance(
+						balance,
+						expense.amount,
+						expense.currency,
+						expense.paidFrom,
+						true,
+					);
 					balance.lastUpdated = new Date();
 					balance.updatedBy = user._id;
 					await balance.save();

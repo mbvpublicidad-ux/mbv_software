@@ -6,6 +6,7 @@ const generalExpenseDefs = gql`
 		concept: String!
 		amount: Float!
 		currency: String!
+		paidFrom: String
 		expenseDate: String!
 		receipt: String
 		description: String
@@ -15,6 +16,7 @@ const generalExpenseDefs = gql`
 	input GeneralExpenseInput {
 		concept: String!
 		amount: Float!
+		paidFrom: String
 		currency: String!
 		expenseDate: String!
 		receipt: String
@@ -24,6 +26,7 @@ const generalExpenseDefs = gql`
 	input UpdateGeneralExpenseInput {
 		concept: String
 		amount: Float
+		paidFrom: String
 		currency: String
 		expenseDate: String
 		receipt: String

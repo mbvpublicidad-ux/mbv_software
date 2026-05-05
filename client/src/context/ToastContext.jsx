@@ -1,37 +1,21 @@
 /* eslint-disable react-refresh/only-export-components */
-import { createContext, useContext, useState, useCallback } from "react";
+import { createContext, useContext } from "react";
+import toast from "react-hot-toast";
 
 const ToastContext = createContext(null);
 
-let idCounter = 0;
-
 export const ToastProvider = ({ children }) => {
-	const [toasts, setToasts] = useState([]);
-
-	const removeToast = useCallback((id) => {
-		setToasts((prev) => prev.filter((t) => t.id !== id));
-	}, []);
-
-	const addToast = useCallback(
-		({ message, type = "info", duration = 4000 }) => {
-			const id = ++idCounter;
-			setToasts((prev) => [...prev, { id, message, type }]);
-			setTimeout(() => removeToast(id), duration);
+	const value = {
+		toast: {
+			success: (message) => toast.success(message),
+			error: (message) => toast.error(message),
+			warning: (message) => toast(message, { icon: "⚠️" }),
+			info: (message) => toast(message, { icon: "ℹ️" }),
 		},
-		[removeToast],
-	);
-
-	const toast = {
-		success: (message, opts) => addToast({ message, type: "success", ...opts }),
-		error: (message, opts) => addToast({ message, type: "error", ...opts }),
-		warning: (message, opts) => addToast({ message, type: "warning", ...opts }),
-		info: (message, opts) => addToast({ message, type: "info", ...opts }),
 	};
 
 	return (
-		<ToastContext.Provider value={{ toasts, toast, removeToast }}>
-			{children}
-		</ToastContext.Provider>
+		<ToastContext.Provider value={value}>{children}</ToastContext.Provider>
 	);
 };
 

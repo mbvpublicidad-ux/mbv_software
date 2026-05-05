@@ -4,8 +4,10 @@ export const GET_COMPANY_BALANCE = gql`
 	query CompanyBalance {
 		companyBalance {
 			_id
-			initialAmount
-			currentBalance
+			initialAmountCRC
+			initialAmountUSD
+			currentBalanceCRC
+			currentBalanceUSD
 			lastUpdated
 			updatedBy {
 				_id

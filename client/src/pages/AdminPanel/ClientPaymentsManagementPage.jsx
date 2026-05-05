@@ -21,7 +21,7 @@ import {
 	BsFileText,
 	BsPerson,
 } from "react-icons/bs";
-import { formatCRC, formatDate } from "../../utils/formatters";
+import { formatCRC, formatDate, formatUSD } from "../../utils/formatters";
 import ImageUploader from "../../components/cars/ImageUploader";
 import CarSearchSelect from "../../components/cars/CarSearchSelect";
 import Badge from "../../components/ui/Badge";
@@ -38,6 +38,7 @@ const ClientPaymentsManagementPage = () => {
 		paymentDate: new Date().toISOString().split("T")[0],
 		paymentMethod: "",
 		pendingBalance: "",
+		currency: "CRC",
 	});
 
 	const [receipt, setReceipt] = useState([]);
@@ -63,13 +64,20 @@ const ClientPaymentsManagementPage = () => {
 
 	const handleCreate = async (e) => {
 		e.preventDefault();
+
+		if (!formData.car) {
+			toast.error("Debes seleccionar un auto");
+			return;
+		}
+
 		try {
 			await createClientPayment({
 				variables: {
 					input: {
 						client: formData.client,
-						car: formData.car,
+						car: formData.car || undefined,
 						amount: Number(formData.amount),
+						currency: formData.currency || "CRC",
 						paymentDate: formData.paymentDate,
 						paymentMethod: formData.paymentMethod || undefined,
 						pendingBalance: formData.pendingBalance
@@ -91,6 +99,12 @@ const ClientPaymentsManagementPage = () => {
 	const handleUpdate = async (e) => {
 		e.preventDefault();
 		if (!editingPayment) return;
+
+		if (!formData.car) {
+			toast.error("Debes seleccionar un auto");
+			return;
+		}
+
 		try {
 			await updateClientPayment({
 				variables: {
@@ -98,6 +112,7 @@ const ClientPaymentsManagementPage = () => {
 					input: {
 						amount: Number(formData.amount),
 						paymentDate: formData.paymentDate,
+						currency: formData.currency || "CRC",
 						paymentMethod: formData.paymentMethod || undefined,
 						pendingBalance: formData.pendingBalance
 							? Number(formData.pendingBalance)
@@ -137,6 +152,7 @@ const ClientPaymentsManagementPage = () => {
 				: new Date().toISOString().split("T")[0],
 			paymentMethod: payment.paymentMethod || "",
 			pendingBalance: payment.pendingBalance?.toString() || "",
+			currency: payment.currency || "CRC",
 		});
 		setReceipt(payment.receipt ? [payment.receipt] : []);
 	};
@@ -149,6 +165,7 @@ const ClientPaymentsManagementPage = () => {
 			paymentDate: new Date().toISOString().split("T")[0],
 			paymentMethod: "",
 			pendingBalance: "",
+			currency: "CRC",
 		});
 		setReceipt([]);
 	};
@@ -207,7 +224,9 @@ const ClientPaymentsManagementPage = () => {
 										{payment.car?.year}
 									</p>
 									<p className="text-xl font-bold text-second mb-1">
-										{formatCRC(payment.amount)}
+										{payment.currency === "USD"
+											? formatUSD(payment.amount)
+											: formatCRC(payment.amount)}
 									</p>
 									{payment.pendingBalance > 0 && (
 										<Badge variant="warning" size="sm" className="mb-2">
@@ -302,9 +321,21 @@ const ClientPaymentsManagementPage = () => {
 							onChange={(id) => setFormData((p) => ({ ...p, car: id }))}
 							disabled={!!editingPayment}
 						/>
+						<Select
+							label="Moneda"
+							size="sm"
+							options={[
+								{ value: "CRC", label: "CRC - Colones" },
+								{ value: "USD", label: "USD - Dólares" },
+							]}
+							value={formData.currency || "CRC"}
+							onChange={(e) =>
+								setFormData((p) => ({ ...p, currency: e.target.value }))
+							}
+						/>
 						<div className="grid grid-cols-2 gap-4">
 							<Input
-								label="Monto (CRC)"
+								label="Monto"
 								type="number"
 								required
 								min={0}

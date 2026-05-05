@@ -3,8 +3,10 @@ import gql from "graphql-tag";
 const companyBalanceDefs = gql`
 	type CompanyBalance {
 		_id: ID!
-		initialAmount: Float!
-		currentBalance: Float!
+		initialAmountCRC: Float!
+		initialAmountUSD: Float!
+		currentBalanceCRC: Float!
+		currentBalanceUSD: Float!
 		lastUpdated: String!
 		updatedBy: User
 	}
@@ -14,7 +16,8 @@ const companyBalanceDefs = gql`
 	}
 
 	type Mutation {
-		updateInitialAmount(amount: Float!): CompanyBalance!
+		updateInitialAmountCRC(amount: Float!): CompanyBalance!
+		updateInitialAmountUSD(amount: Float!): CompanyBalance!
 		recalculateBalance: CompanyBalance!
 	}
 `;

@@ -1,6 +1,6 @@
 import GeneralExpense from "../../models/GeneralExpense.js";
 import CompanyBalance from "../../models/CompanyBalance.js";
-import { getCurrentExchangeRate } from "../../utils/currencyConverter.js";
+import { updateBalance } from "../../utils/currencyConverter.js";
 
 const generalExpenseResolvers = {
 	Query: {
@@ -49,12 +49,12 @@ const generalExpenseResolvers = {
 			// Update CompanyBalance - reduce balance
 			const balance = await CompanyBalance.findOne();
 			if (balance) {
-				if (input.currency === "CRC") {
-					balance.currentBalance -= input.amount;
-				} else if (input.currency === "USD") {
-					const rate = await getCurrentExchangeRate();
-					balance.currentBalance -= input.amount * rate;
-				}
+				await updateBalance(
+					balance,
+					input.amount,
+					input.currency,
+					input.paidFrom,
+				);
 				balance.lastUpdated = new Date();
 				balance.updatedBy = user._id;
 				await balance.save();
@@ -68,8 +68,33 @@ const generalExpenseResolvers = {
 				throw new Error("Not authorized");
 			}
 
+			const expense = await GeneralExpense.findById(id);
+			if (!expense) throw new Error("General expense not found");
+
 			if (input.receipt === "" || input.receipt === undefined) {
 				input.receipt = null;
+			}
+
+			const balance = await CompanyBalance.findOne();
+			if (balance) {
+				// Revertir el gasto anterior
+				await updateBalance(
+					balance,
+					expense.amount,
+					expense.currency,
+					expense.paidFrom,
+					true,
+				);
+				// Aplicar el nuevo gasto
+				await updateBalance(
+					balance,
+					input.amount || expense.amount,
+					input.currency || expense.currency,
+					input.paidFrom !== undefined ? input.paidFrom : expense.paidFrom,
+				);
+				balance.lastUpdated = new Date();
+				balance.updatedBy = user._id;
+				await balance.save();
 			}
 
 			const updatedExpense = await GeneralExpense.findByIdAndUpdate(
@@ -93,12 +118,13 @@ const generalExpenseResolvers = {
 			// Reembolsar al balance
 			const balance = await CompanyBalance.findOne();
 			if (balance) {
-				if (expense.currency === "CRC") {
-					balance.currentBalance += expense.amount;
-				} else {
-					const rate = await getCurrentExchangeRate();
-					balance.currentBalance += expense.amount * rate;
-				}
+				await updateBalance(
+					balance,
+					expense.amount,
+					expense.currency,
+					expense.paidFrom,
+					true,
+				);
 				balance.lastUpdated = new Date();
 				balance.updatedBy = user._id;
 				await balance.save();

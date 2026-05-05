@@ -18,6 +18,7 @@ export const CREATE_CLIENT_PAYMENT = gql`
 				}
 				year
 			}
+			currency
 			amount
 			paymentDate
 			paymentMethod
@@ -37,6 +38,7 @@ export const UPDATE_CLIENT_PAYMENT = gql`
 		updateClientPayment(id: $id, input: $input) {
 			_id
 			amount
+			currency
 			paymentDate
 			paymentMethod
 			pendingBalance

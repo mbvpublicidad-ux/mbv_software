@@ -21,6 +21,7 @@ const initialFormData = {
 	type: "",
 	description: "",
 	amount: "",
+	paidFrom: "",
 	currency: "CRC",
 	expenseDate: new Date().toISOString().split("T")[0],
 	isFromJuanCarlos: false,
@@ -37,6 +38,7 @@ const ExpenseForm = ({ expense, onClose, onSuccess }) => {
 				type: expense.type || "",
 				description: expense.description || "",
 				amount: expense.amount?.toString() || "",
+				paidFrom: expense.paidFrom || expense.currency || "",
 				currency: expense.currency || "CRC",
 				expenseDate: expense.expenseDate
 					? expense.expenseDate.split("T")[0]
@@ -69,6 +71,7 @@ const ExpenseForm = ({ expense, onClose, onSuccess }) => {
 			...prev,
 			type,
 			isFromJuanCarlos: expenseType?.isJC || false,
+			paidFrom: expenseType?.isJC ? "USD" : prev.paidFrom,
 		}));
 	};
 
@@ -98,6 +101,7 @@ const ExpenseForm = ({ expense, onClose, onSuccess }) => {
 				type: formData.type,
 				description: formData.description.trim() || undefined,
 				amount: Number(formData.amount),
+				paidFrom: formData.paidFrom || undefined,
 				currency: formData.currency,
 				expenseDate: formData.expenseDate,
 				isFromJuanCarlos: formData.isFromJuanCarlos,
@@ -114,6 +118,7 @@ const ExpenseForm = ({ expense, onClose, onSuccess }) => {
 							type: formData.type,
 							description: formData.description.trim() || undefined,
 							amount: Number(formData.amount),
+							paidFrom: formData.paidFrom || undefined,
 							currency: formData.currency,
 							expenseDate: formData.expenseDate,
 							isFromJuanCarlos: formData.isFromJuanCarlos,
@@ -174,6 +179,16 @@ const ExpenseForm = ({ expense, onClose, onSuccess }) => {
 					value={formData.currency}
 					onChange={(e) => handleChange("currency", e.target.value)}
 					size="sm"
+				/>
+				<Select
+					label="Pagado desde"
+					size="sm"
+					options={[
+						{ value: "CRC", label: "CRC - Colones" },
+						{ value: "USD", label: "USD - Dólares" },
+					]}
+					value={formData.paidFrom || formData.currency}
+					onChange={(e) => handleChange("paidFrom", e.target.value)}
 				/>
 			</div>
 			<Input

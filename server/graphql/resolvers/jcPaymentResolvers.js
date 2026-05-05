@@ -1,7 +1,6 @@
 import JCPayment from "../../models/JCPayment.js";
 import Expense from "../../models/Expense.js";
 import CompanyBalance from "../../models/CompanyBalance.js";
-import { getCurrentExchangeRate } from "../../utils/currencyConverter.js";
 
 const jcPaymentResolvers = {
 	Query: {
@@ -104,8 +103,7 @@ const jcPaymentResolvers = {
 			// Update CompanyBalance - reduce balance (real payment made)
 			const balance = await CompanyBalance.findOne();
 			if (balance) {
-				const rate = await getCurrentExchangeRate();
-				balance.currentBalance -= input.amount * rate;
+				balance.currentBalanceUSD -= input.amount;
 				balance.lastUpdated = new Date();
 				balance.updatedBy = user._id;
 				await balance.save();
@@ -134,6 +132,15 @@ const jcPaymentResolvers = {
 
 			if (input.receipt === "" || input.receipt === undefined) {
 				input.receipt = null;
+			}
+
+			const balance = await CompanyBalance.findOne();
+			if (balance) {
+				balance.currentBalanceUSD += payment.amount; // Revertir
+				balance.currentBalanceUSD -= input.amount || payment.amount; // Nuevo
+				balance.lastUpdated = new Date();
+				balance.updatedBy = user._id;
+				await balance.save();
 			}
 
 			const updatedPayment = await JCPayment.findByIdAndUpdate(
@@ -171,8 +178,7 @@ const jcPaymentResolvers = {
 			// Reembolsar al balance
 			const balance = await CompanyBalance.findOne();
 			if (balance) {
-				const rate = await getCurrentExchangeRate();
-				balance.currentBalance += payment.amount * rate;
+				balance.currentBalanceUSD += payment.amount;
 				balance.lastUpdated = new Date();
 				balance.updatedBy = user._id;
 				await balance.save();

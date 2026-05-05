@@ -21,3 +21,37 @@ export const convertCRCtoUSD = async (amountCRC) => {
 	const rate = await getCurrentExchangeRate();
 	return amountCRC / rate;
 };
+
+// Nueva función para actualizar balance
+export const updateBalance = async (
+	balance,
+	amount,
+	currency,
+	paidFrom,
+	isReversal = false,
+) => {
+	const sign = isReversal ? 1 : -1; // -1 para gastos, +1 para reembolsos
+	const effectivePaidFrom = paidFrom || currency;
+
+	if (effectivePaidFrom === currency) {
+		// Misma moneda
+		if (currency === "CRC") {
+			balance.currentBalanceCRC += sign * amount;
+		} else {
+			balance.currentBalanceUSD += sign * amount;
+		}
+	} else {
+		// Conversión
+		if (effectivePaidFrom === "USD") {
+			// Pagar CRC desde USD
+			const usdAmount = await convertCRCtoUSD(amount);
+			balance.currentBalanceUSD += sign * usdAmount;
+		} else {
+			// Pagar USD desde CRC
+			const crcAmount = await convertUSDtoCRC(amount);
+			balance.currentBalanceCRC += sign * crcAmount;
+		}
+	}
+
+	return balance;
+};

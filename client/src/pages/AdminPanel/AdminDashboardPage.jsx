@@ -45,8 +45,11 @@ const AdminDashboardPage = () => {
 	});
 
 	const { data: clientsData, loading: clientsLoading } = useQuery(GET_CLIENTS);
-	const { data: balanceData, loading: balanceLoading } =
-		useQuery(GET_COMPANY_BALANCE);
+	const {
+		data: balanceData,
+		loading: balanceLoading,
+		refetch: refetchBalance,
+	} = useQuery(GET_COMPANY_BALANCE);
 	const { data: jcDebtData, loading: jcDebtLoading } =
 		useQuery(GET_JC_DEBT_SUMMARY);
 	const { data: exchangeData } = useQuery(GET_EXCHANGE_RATE);
@@ -94,7 +97,10 @@ const AdminDashboardPage = () => {
 	const statsCards = [
 		{
 			title: "Balance actual",
-			value: formatCRC(companyBalance?.currentBalance || 0),
+			value: formatCRC(
+				(companyBalance?.currentBalanceCRC || 0) +
+					(companyBalance?.currentBalanceUSD || 0) * exchangeRate,
+			),
 			icon: BsCashStack,
 			color: "from-green-500/20 to-green-500/5",
 			iconColor: "text-success",
@@ -135,7 +141,7 @@ const AdminDashboardPage = () => {
 			await updateExchangeRate({
 				variables: { value: Number(newExchangeRate) },
 			});
-			window.location.reload(); // Recargar para actualizar todas las queries
+			refetchBalance(); // Recargar para actualizar todas las queries
 		} catch (error) {
 			console.error(error);
 		}
@@ -301,16 +307,29 @@ const AdminDashboardPage = () => {
 						</h2>
 						<div className="space-y-3">
 							<div className="flex justify-between">
-								<span className="text-sm text-first/50">Monto inicial</span>
-								<span className="text-sm font-medium text-first">
-									{formatCRC(companyBalance?.initialAmount || 0)}
+								<span className="text-sm text-first/50">Balance CRC</span>
+								<span className="text-sm font-bold text-second">
+									{formatCRC(companyBalance?.currentBalanceCRC || 0)}
 								</span>
 							</div>
 							<div className="flex justify-between">
-								<span className="text-sm text-first/50">Balance actual</span>
+								<span className="text-sm text-first/50">Balance USD</span>
 								<span className="text-sm font-bold text-second">
-									{formatCRC(companyBalance?.currentBalance || 0)}
+									{formatUSD(companyBalance?.currentBalanceUSD || 0)}
 								</span>
+							</div>
+							<div className="border-t border-first/10 pt-3">
+								<div className="flex justify-between">
+									<span className="text-sm text-first/50">
+										Balance total (CRC)
+									</span>
+									<span className="text-sm font-bold text-second">
+										{formatCRC(
+											(companyBalance?.currentBalanceCRC || 0) +
+												(companyBalance?.currentBalanceUSD || 0) * exchangeRate,
+										)}
+									</span>
+								</div>
 							</div>
 							<div className="border-t border-first/10 pt-3">
 								<div className="flex justify-between items-center">
@@ -375,7 +394,7 @@ const AdminDashboardPage = () => {
 									onClick={async () => {
 										try {
 											await recalculateBalance();
-											window.location.reload();
+											refetchBalance();
 										} catch (error) {
 											toast.error("Error al recalcular balance", error.message);
 										}
@@ -419,7 +438,7 @@ const AdminDashboardPage = () => {
 					<Modal
 						isOpen={showExchangeModal}
 						onClose={() => setShowExchangeModal(false)}
-						title="Actualizar Tipo de Cambio"
+						title="Configuración de Balance"
 						size="sm"
 					>
 						<div className="space-y-4">
@@ -440,23 +459,22 @@ const AdminDashboardPage = () => {
 								min={0}
 								size="md"
 							/>
-							<p className="text-xs text-first/40">
-								Este valor afecta todos los cálculos de conversión USD a CRC en
-								el sistema.
-							</p>
-							<div className="flex justify-end gap-2 pt-2">
+							<Button
+								onClick={handleUpdateRate}
+								loading={updatingRate}
+								disabled={!newExchangeRate || Number(newExchangeRate) <= 0}
+								size="sm"
+								fullWidth
+							>
+								Actualizar tipo de cambio
+							</Button>
+
+							<div className="flex justify-end pt-2">
 								<Button
 									variant="ghost"
 									onClick={() => setShowExchangeModal(false)}
 								>
-									Cancelar
-								</Button>
-								<Button
-									onClick={handleUpdateRate}
-									loading={updatingRate}
-									disabled={!newExchangeRate || Number(newExchangeRate) <= 0}
-								>
-									Actualizar
+									Cerrar
 								</Button>
 							</div>
 						</div>

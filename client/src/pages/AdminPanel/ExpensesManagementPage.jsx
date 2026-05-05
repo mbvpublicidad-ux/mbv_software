@@ -3,15 +3,16 @@ import { useQuery, useMutation } from "@apollo/client/react";
 
 import { GET_EXPENSES } from "../../graphql/queries/expenseQueries";
 import { DELETE_EXPENSE } from "../../graphql/mutations/expenseMutations";
+import { GET_GENERAL_EXPENSES } from "../../graphql/queries/generalExpenseQueries";
 
 import { useToast } from "../../context/ToastContext";
 
-import Button from "../../components/ui/Button";
 import Badge from "../../components/ui/Badge";
-import { Modal, ConfirmDialog } from "../../components/ui/Modal";
-import { LoadingOverlay } from "../../components/ui/LoadingUi";
+import Button from "../../components/ui/Button";
 import EmptyState from "../../components/ui/EmptyState";
+import { LoadingOverlay } from "../../components/ui/LoadingUi";
 import ExpenseForm from "../../components/expenses/ExpenseForm";
+import { Modal, ConfirmDialog } from "../../components/ui/Modal";
 import ExpensesAnalytics from "../../components/expenses/ExpensesAnalytics";
 
 import {
@@ -42,8 +43,10 @@ const ExpensesManagementPage = () => {
 	const [showAnalytics, setShowAnalytics] = useState(false);
 
 	const { data, loading, refetch } = useQuery(GET_EXPENSES);
+	const { data: generalExpensesData } = useQuery(GET_GENERAL_EXPENSES);
 
 	const [deleteExpense] = useMutation(DELETE_EXPENSE);
+	const generalExpenses = generalExpensesData?.generalExpenses || [];
 
 	const expenses = data?.expenses || [];
 
@@ -123,7 +126,12 @@ const ExpensesManagementPage = () => {
 								{showAnalytics ? "Ocultar analíticas" : "Ver analíticas"}
 							</Button>
 						</div>
-						{showAnalytics && <ExpensesAnalytics expenses={filteredExpenses} />}
+						{showAnalytics && (
+							<ExpensesAnalytics
+								expenses={filteredExpenses}
+								generalExpenses={generalExpenses}
+							/>
+						)}
 					</div>
 				)}
 

@@ -17,6 +17,7 @@ export const CREATE_EXPENSE = gql`
 			type
 			description
 			amount
+			paidFrom
 			currency
 			expenseDate
 			receipt
@@ -33,6 +34,7 @@ export const UPDATE_EXPENSE = gql`
 			type
 			description
 			amount
+			paidFrom
 			currency
 			expenseDate
 			isFromJuanCarlos

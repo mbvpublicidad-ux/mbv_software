@@ -6,6 +6,7 @@ export const GET_GENERAL_EXPENSES = gql`
 			_id
 			concept
 			amount
+			paidFrom
 			currency
 			expenseDate
 			receipt
