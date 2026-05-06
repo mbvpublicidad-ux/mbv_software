@@ -373,7 +373,7 @@ const AdminDashboardPage = () => {
 					{/* JC Debt */}
 					<div className="bg-main rounded-2xl border border-first/10 p-6">
 						<h2 className="text-lg font-semibold text-first mb-4">
-							Deuda con Juan Carlos
+							Inversión de Juan Carlos
 						</h2>
 						<div className="space-y-3">
 							<div className="flex justify-between">
