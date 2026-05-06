@@ -14,10 +14,12 @@ import {
 } from "react-icons/bs";
 
 import { GET_CARS } from "../../graphql/queries/carQueries";
-import { GET_CLIENTS } from "../../graphql/queries/userQueries";
-import { GET_COMPANY_BALANCE } from "../../graphql/queries/companyBalanceQueries";
+import { GET_EXPENSES } from "../../graphql/queries/expenseQueries";
+import { GET_JC_PAYMENTS } from "../../graphql/queries/jcPaymentQueries";
 import { GET_JC_DEBT_SUMMARY } from "../../graphql/queries/jcPaymentQueries";
 import { GET_EXCHANGE_RATE } from "../../graphql/queries/exchangeRateQueries";
+import { GET_COMPANY_BALANCE } from "../../graphql/queries/companyBalanceQueries";
+import { GET_GENERAL_EXPENSES } from "../../graphql/queries/generalExpenseQueries";
 
 import { UPDATE_EXCHANGE_RATE } from "../../graphql/mutations/exchangeRateMutations";
 import { RECALCULATE_BALANCE } from "../../graphql/mutations/companyBalanceMutations";
@@ -41,8 +43,6 @@ const AdminDashboardPage = () => {
 		variables: { page: 1, limit: 1000 },
 	});
 
-	const { data: clientsData, loading: clientsLoading } = useQuery(GET_CLIENTS);
-
 	const {
 		data: balanceData,
 		loading: balanceLoading,
@@ -52,26 +52,40 @@ const AdminDashboardPage = () => {
 	const { data: jcDebtData, loading: jcDebtLoading } =
 		useQuery(GET_JC_DEBT_SUMMARY);
 
+	const { data: jcPaymentsData } = useQuery(GET_JC_PAYMENTS);
+
 	const { data: exchangeData, refetch: refetchExchange } =
 		useQuery(GET_EXCHANGE_RATE);
+
+	const { data: expensesData } = useQuery(GET_EXPENSES);
+
+	const { data: generalExpensesData } = useQuery(GET_GENERAL_EXPENSES);
 
 	const [updateExchangeRate] = useMutation(UPDATE_EXCHANGE_RATE);
 	const [recalculateBalance] = useMutation(RECALCULATE_BALANCE);
 
-	const loading =
-		carsLoading || clientsLoading || balanceLoading || jcDebtLoading;
+	const loading = carsLoading || balanceLoading || jcDebtLoading;
 
 	const cars = carsData?.cars?.cars || [];
-	const clients = clientsData?.clients || [];
-	const companyBalance = balanceData?.companyBalance;
 	const jcSummary = jcDebtData?.jcDebtSummary;
+	const allExpenses = expensesData?.expenses || [];
+	const companyBalance = balanceData?.companyBalance;
+	const jcPayments = jcPaymentsData?.jcPayments || [];
 	const exchangeRate = exchangeData?.exchangeRate?.value || 0;
+	const generalExpenses = generalExpensesData?.generalExpenses || [];
 
 	const availableCars = cars.filter(
 		(c) => c.availability === "Available",
 	).length;
+
 	const soldCars = cars.filter((c) => c.availability === "Sold").length;
+
+	const soldCarIds = new Set(
+		cars.filter((c) => c.availability === "Sold").map((c) => c._id),
+	);
+
 	const reservedCars = cars.filter((c) => c.availability === "Reserved").length;
+
 	const inRepairCars = cars.filter(
 		(c) => c.availability === "Under repair",
 	).length;
@@ -79,17 +93,64 @@ const AdminDashboardPage = () => {
 	const inTransit = cars.filter(
 		(c) => c.logisticStatus === "In transit",
 	).length;
+
 	const inWarehouse = cars.filter(
 		(c) => c.logisticStatus === "In warehouse",
 	).length;
+
 	const dekraPending = cars.filter(
 		(c) => c.logisticStatus === "Dekra pending",
 	).length;
+
 	const availableForSale = cars.filter(
 		(c) =>
 			c.logisticStatus === "Available for direct sale" &&
 			c.availability === "Available",
 	).length;
+
+	const paidJC_CarIds = new Set();
+	jcPayments.forEach((p) => {
+		(p.associatedCars || []).forEach((ac) => {
+			if (ac.car?._id) paidJC_CarIds.add(ac.car._id);
+		});
+	});
+
+	const totalSoldCarsExpensesCRC = allExpenses
+		.filter((e) => {
+			if (!e.car?._id) return false;
+			if (!soldCarIds.has(e.car._id)) return false;
+			return true; // Todos los gastos de autos vendidos cuentan
+		})
+		.reduce((sum, e) => {
+			if (e.currency === "CRC") return sum + e.amount;
+			const rate = e.exchangeRateUsed || exchangeRate;
+			return sum + e.amount * rate;
+		}, 0);
+
+	const totalExpensesCRC = allExpenses
+		.filter((e) => {
+			if (!e.isFromJuanCarlos) return true;
+			if (e.isFromJuanCarlos && e.car?._id && paidJC_CarIds.has(e.car._id))
+				return true;
+			return false;
+		})
+		.reduce((sum, e) => {
+			if (e.currency === "CRC") return sum + e.amount;
+			const rate = e.exchangeRateUsed || exchangeRate;
+			return sum + e.amount * rate;
+		}, 0);
+
+	const totalGeneralCRC = generalExpenses.reduce((sum, e) => {
+		if (e.currency === "CRC") return sum + e.amount;
+		const rate = e.exchangeRateUsed || exchangeRate;
+		return sum + e.amount * rate;
+	}, 0);
+
+	const totalAllExpensesCRC = totalExpensesCRC + totalGeneralCRC;
+
+	const totalProfit = cars
+		.filter((c) => c.availability === "Sold")
+		.reduce((sum, c) => sum + (c.profitCRC || 0), 0);
 
 	const totalSalesValue = cars
 		.filter((c) => c.availability === "Sold")
@@ -108,27 +169,35 @@ const AdminDashboardPage = () => {
 			link: null,
 		},
 		{
-			title: "Vehículos disponibles",
-			value: availableCars,
-			icon: BsCarFront,
-			color: "from-blue-500/20 to-blue-500/5",
-			iconColor: "text-blue-500",
-			link: "/admin/cars",
-		},
-		{
-			title: "Clientes registrados",
-			value: clients.length,
-			icon: BsPeople,
-			color: "from-purple-500/20 to-purple-500/5",
-			iconColor: "text-purple-500",
-			link: "/admin/clients",
-		},
-		{
 			title: "Ventas totales",
 			value: formatCRC(totalSalesValue),
 			icon: BsGraphUp,
 			color: "from-yellow-500/20 to-yellow-500/5",
 			iconColor: "text-yellow-500",
+			link: null,
+		},
+		{
+			title: "Gastos de Autos Vendidos",
+			value: formatCRC(totalSoldCarsExpensesCRC),
+			icon: BsGraphUp,
+			color: "from-red-400/40 to-red-400/5",
+			iconColor: "text-red-400",
+			link: null,
+		},
+		{
+			title: "Ganancias Autos Vendidos",
+			value: formatCRC(totalProfit),
+			icon: BsPeople,
+			color: "from-green-500/20 to-green-500/5",
+			iconColor: "text-green-500",
+			link: null,
+		},
+		{
+			title: "Gastos Totales",
+			value: formatCRC(totalAllExpensesCRC),
+			icon: BsCarFront,
+			color: "from-red-500/40 to-red-500/5",
+			iconColor: "text-red-500",
 			link: null,
 		},
 	];

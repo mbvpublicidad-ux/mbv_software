@@ -70,6 +70,11 @@ const menuItems = [
 		label: "Calculadora",
 	},
 	{
+		to: "/admin/company-value",
+		icon: BsCalculator,
+		label: "Valor Empresa",
+	},
+	{
 		to: "/admin/reports",
 		icon: BsFileText,
 		label: "Reporte Contable",

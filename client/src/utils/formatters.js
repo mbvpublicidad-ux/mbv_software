@@ -154,8 +154,8 @@ export const getAvailabilityColor = (availability) => {
 export const getLogisticStatusText = (status) => {
 	const texts = {
 		"In transit": "En camino",
-		"In warehouse": "En almacén",
-		"Dekra pending": "Dekra pendiente",
+		"In warehouse": "En almacén fiscal",
+		"Dekra pending": "En bodega",
 		"Available for direct sale": "Disponible para venta directa",
 	};
 

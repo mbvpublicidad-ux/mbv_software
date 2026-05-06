@@ -8,8 +8,8 @@ export const LOGISTIC_STATUSES = {
 
 export const LOGISTIC_STATUS_OPTIONS = [
 	{ value: LOGISTIC_STATUSES.IN_TRANSIT, label: "En camino" },
-	{ value: LOGISTIC_STATUSES.IN_WAREHOUSE, label: "En almacén" },
-	{ value: LOGISTIC_STATUSES.DEKRA_PENDING, label: "Dekra pendiente" },
+	{ value: LOGISTIC_STATUSES.IN_WAREHOUSE, label: "En almacén fiscal" },
+	{ value: LOGISTIC_STATUSES.DEKRA_PENDING, label: "En Bodega" },
 	{
 		value: LOGISTIC_STATUSES.AVAILABLE_FOR_SALE,
 		label: "Disponible para venta directa",

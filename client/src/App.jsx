@@ -11,7 +11,6 @@ import TokenWatcher from "./routes/TokenWatcher";
 import ProtectedRoutes from "./routes/ProtectedRoutes";
 import { LoadingOverlay } from "./components/ui/LoadingUi";
 import AdminLayout from "./components/common/AdminLayout";
-import ImportCalculatorPage from "./pages/AdminPanel/ImportCalculatorPage";
 
 // Lazy loaded pages
 const LandingPage = lazy(() => import("./pages/LandingPage"));
@@ -53,6 +52,12 @@ const AccountingReportPage = lazy(
 );
 const UsersManagementPage = lazy(
 	() => import("./pages/AdminPanel/UsersManagementPage"),
+);
+const ImportCalculatorPage = lazy(
+	() => import("./pages/AdminPanel/ImportCalculatorPage"),
+);
+const CompanyValuePage = lazy(
+	() => import("./pages/AdminPanel/CompanyValuePage"),
 );
 
 const SuspenseFallback = () => (
@@ -147,6 +152,10 @@ const App = () => {
 								<Route
 									path="/admin/calculator"
 									element={<ImportCalculatorPage />}
+								/>
+								<Route
+									path="/admin/company-value"
+									element={<CompanyValuePage />}
 								/>
 							</Route>
 						</Route>
