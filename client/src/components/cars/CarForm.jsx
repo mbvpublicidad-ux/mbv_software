@@ -32,7 +32,9 @@ const initialFormData = {
 	vin: "",
 	dua: "",
 	year: new Date().getFullYear(),
-	purchaseDate: new Date().toISOString().split("T")[0],
+	purchaseDate: new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+		.toISOString()
+		.split("T")[0],
 	duaRegistrationDate: "",
 	publishedPriceCRC: "",
 	purchaseValueUSD: "",
@@ -57,17 +59,23 @@ const initialMandatoryExpenses = {
 	shippingLine: {
 		amount: "",
 		currency: "CRC",
-		expenseDate: new Date().toISOString().split("T")[0],
+		expenseDate: new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+			.toISOString()
+			.split("T")[0],
 	},
 	inspection: {
 		amount: "",
 		currency: "USD",
-		expenseDate: new Date().toISOString().split("T")[0],
+		expenseDate: new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+			.toISOString()
+			.split("T")[0],
 	},
 	towTruck: {
 		amount: "",
 		currency: "USD",
-		expenseDate: new Date().toISOString().split("T")[0],
+		expenseDate: new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+			.toISOString()
+			.split("T")[0],
 	},
 };
 
@@ -85,7 +93,9 @@ const CarForm = ({ car, onClose, onSuccess }) => {
 				year: car.year || new Date().getFullYear(),
 				purchaseDate: car.purchaseDate
 					? car.purchaseDate.split("T")[0]
-					: new Date().toISOString().split("T")[0],
+					: new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+							.toISOString()
+							.split("T")[0],
 				duaRegistrationDate: car.duaRegistrationDate
 					? car.duaRegistrationDate.split("T")[0]
 					: "",
@@ -166,7 +176,9 @@ const CarForm = ({ car, onClose, onSuccess }) => {
 				description: "",
 				amount: "",
 				currency: "CRC",
-				expenseDate: new Date().toISOString().split("T")[0],
+				expenseDate: new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+					.toISOString()
+					.split("T")[0],
 				isFromJuanCarlos: false,
 			},
 		]);
@@ -276,10 +288,9 @@ const CarForm = ({ car, onClose, onSuccess }) => {
 		};
 
 		if (!isEditing) {
-			// Agregar gastos obligatorios y opcionales
 			const expenseInputs = [
 				{
-					car: "", // Se asignará en el resolver
+					car: "",
 					type: "Shipping line",
 					amount: Number(mandatoryExpenses.shippingLine.amount),
 					currency: mandatoryExpenses.shippingLine.currency,

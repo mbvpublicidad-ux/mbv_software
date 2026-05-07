@@ -15,7 +15,9 @@ const initialFormData = {
 	amount: "",
 	paidFrom: "",
 	currency: "CRC",
-	expenseDate: new Date().toISOString().split("T")[0],
+	expenseDate: new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+		.toISOString()
+		.split("T")[0],
 	description: "",
 };
 
@@ -32,8 +34,11 @@ const GeneralExpenseForm = ({ expense, onClose, onSuccess }) => {
 				paidFrom: expense.paidFrom || expense.currency || "",
 				expenseDate: expense.expenseDate
 					? expense.expenseDate.split("T")[0]
-					: new Date().toISOString().split("T")[0],
+					: new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+							.toISOString()
+							.split("T")[0],
 				description: expense.description || "",
+				receipt: expense.receipt || "",
 			};
 		}
 		return initialFormData;

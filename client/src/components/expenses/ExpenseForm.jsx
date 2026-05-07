@@ -23,7 +23,9 @@ const initialFormData = {
 	amount: "",
 	paidFrom: "",
 	currency: "CRC",
-	expenseDate: new Date().toISOString().split("T")[0],
+	expenseDate: new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+		.toISOString()
+		.split("T")[0],
 	isFromJuanCarlos: false,
 };
 
@@ -42,8 +44,11 @@ const ExpenseForm = ({ expense, onClose, onSuccess }) => {
 				currency: expense.currency || "CRC",
 				expenseDate: expense.expenseDate
 					? expense.expenseDate.split("T")[0]
-					: new Date().toISOString().split("T")[0],
+					: new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+							.toISOString()
+							.split("T")[0],
 				isFromJuanCarlos: expense.isFromJuanCarlos || false,
+				receipt: expense.receipt || "",
 			};
 		}
 		return initialFormData;

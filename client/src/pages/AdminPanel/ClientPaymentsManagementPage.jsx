@@ -35,7 +35,9 @@ const ClientPaymentsManagementPage = () => {
 		client: "",
 		car: "",
 		amount: "",
-		paymentDate: new Date().toISOString().split("T")[0],
+		paymentDate: new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+			.toISOString()
+			.split("T")[0],
 		paymentMethod: "",
 		pendingBalance: "",
 		currency: "CRC",
@@ -149,7 +151,9 @@ const ClientPaymentsManagementPage = () => {
 			amount: payment.amount?.toString() || "",
 			paymentDate: payment.paymentDate
 				? payment.paymentDate.split("T")[0]
-				: new Date().toISOString().split("T")[0],
+				: new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+						.toISOString()
+						.split("T")[0],
 			paymentMethod: payment.paymentMethod || "",
 			pendingBalance: payment.pendingBalance?.toString() || "",
 			currency: payment.currency || "CRC",
@@ -162,7 +166,9 @@ const ClientPaymentsManagementPage = () => {
 			client: "",
 			car: "",
 			amount: "",
-			paymentDate: new Date().toISOString().split("T")[0],
+			paymentDate: new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+				.toISOString()
+				.split("T")[0],
 			paymentMethod: "",
 			pendingBalance: "",
 			currency: "CRC",

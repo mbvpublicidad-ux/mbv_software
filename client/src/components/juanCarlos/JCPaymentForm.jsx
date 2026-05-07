@@ -22,7 +22,9 @@ import CarSearchSelect from "../cars/CarSearchSelect";
 
 const initialFormData = {
 	amount: "",
-	actualPaymentDate: new Date().toISOString().split("T")[0],
+	actualPaymentDate: new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+		.toISOString()
+		.split("T")[0],
 	concept: "",
 	associatedCars: [],
 	transferReference: "",
@@ -38,7 +40,9 @@ const JCPaymentForm = ({ payment, onClose, onSuccess }) => {
 				amount: payment.amount?.toString() || "",
 				actualPaymentDate: payment.actualPaymentDate
 					? payment.actualPaymentDate.split("T")[0]
-					: new Date().toISOString().split("T")[0],
+					: new Date(new Date().getTime() - 6 * 60 * 60 * 1000)
+							.toISOString()
+							.split("T")[0],
 				concept: payment.concept || "",
 				associatedCars:
 					payment.associatedCars?.map((ac) => ({
@@ -48,6 +52,7 @@ const JCPaymentForm = ({ payment, onClose, onSuccess }) => {
 						pending: 0,
 					})) || [],
 				transferReference: payment.transferReference || "",
+				receipt: payment.receipt || "",
 			};
 		}
 		return initialFormData;
