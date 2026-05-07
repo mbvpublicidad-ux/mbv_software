@@ -5,6 +5,7 @@ import Expense from "../../models/Expense.js";
 import GeneralExpense from "../../models/GeneralExpense.js";
 import JCPayment from "../../models/JCPayment.js";
 import ExchangeRate from "../../models/ExchangeRate.js";
+import GeneralIncome from "../../models/GeneralIncome.js";
 
 const companyBalanceResolvers = {
 	Query: {
@@ -144,15 +145,29 @@ const companyBalanceResolvers = {
 				0,
 			);
 
+			// Ingresos generales
+			const generalIncomes = await GeneralIncome.find({});
+			let totalIncomesCRC = 0;
+			let totalIncomesUSD = 0;
+			for (const inc of generalIncomes) {
+				if (inc.currency === "CRC") {
+					totalIncomesCRC += inc.amount;
+				} else {
+					totalIncomesUSD += inc.amount;
+				}
+			}
+
 			balance.currentBalanceCRC =
 				balance.initialAmountCRC +
 				totalSales +
-				totalClientPaymentsCRC -
+				totalClientPaymentsCRC +
+				totalIncomesCRC -
 				totalExpensesCRC -
 				totalGeneralCRC;
 			balance.currentBalanceUSD =
 				balance.initialAmountUSD +
-				totalClientPaymentsUSD -
+				totalClientPaymentsUSD +
+				totalIncomesUSD -
 				totalExpensesUSD -
 				totalGeneralUSD -
 				totalJCPaymentsUSD;

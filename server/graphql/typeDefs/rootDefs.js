@@ -13,6 +13,7 @@ import clientPaymentDefs from "./clientPaymentDefs.js";
 import exchangeRateDefs from "./exchangeRateDefs.js";
 import companyBalanceDefs from "./companyBalanceDefs.js";
 import carEstimateDefs from "./carEstimateDefs.js";
+import generalIncomeDefs from "./generalIncomeDefs.js";
 
 const customScalars = gql`
 	scalar Upload
@@ -31,6 +32,7 @@ const typeDefs = mergeTypeDefs([
 	exchangeRateDefs,
 	companyBalanceDefs,
 	carEstimateDefs,
+	generalIncomeDefs,
 ]);
 
 export default typeDefs;

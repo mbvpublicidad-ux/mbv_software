@@ -59,6 +59,9 @@ const ImportCalculatorPage = lazy(
 const CompanyValuePage = lazy(
 	() => import("./pages/AdminPanel/CompanyValuePage"),
 );
+const GeneralIncomesPage = lazy(
+	() => import("./pages/AdminPanel/GeneralIncomesPage"),
+);
 
 const SuspenseFallback = () => (
 	<div className="min-h-screen flex items-center justify-center">
@@ -157,6 +160,7 @@ const App = () => {
 									path="/admin/company-value"
 									element={<CompanyValuePage />}
 								/>
+								<Route path="/admin/incomes" element={<GeneralIncomesPage />} />
 							</Route>
 						</Route>
 

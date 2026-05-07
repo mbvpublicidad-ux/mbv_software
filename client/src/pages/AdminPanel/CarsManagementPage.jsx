@@ -260,7 +260,9 @@ const CarsManagementPage = () => {
 											{car.brand?.name} {car.carModel?.name} {car.year}{" "}
 											{car.color.toUpperCase()}
 										</h3>
-										<p className="text-xs text-first/40 mt-0.5">{car.vin}</p>
+										<p className="text-xs text-first/40 mt-0.5">
+											{car.vin} {car.dua && `| ${car.dua}`}{" "}
+										</p>
 									</Link>
 
 									<div className="px-4 pb-2 space-y-2">

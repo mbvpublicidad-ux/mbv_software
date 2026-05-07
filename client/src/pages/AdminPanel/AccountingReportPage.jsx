@@ -8,7 +8,7 @@ import Badge from "../../components/ui/Badge";
 import { LoadingOverlay } from "../../components/ui/LoadingUi";
 import EmptyState from "../../components/ui/EmptyState";
 import { BsDownload, BsPrinter, BsCarFront } from "react-icons/bs";
-import { formatDate } from "../../utils/formatters";
+import { formatDate, getDetailsTranslation } from "../../utils/formatters";
 
 const AccountingReportPage = () => {
 	const [selectedMonth, setSelectedMonth] = useState(() => {
@@ -53,7 +53,7 @@ const AccountingReportPage = () => {
 	const allCars = useMemo(() => {
 		const mbvCars = filteredMBVCars.map((car) => ({
 			...car,
-			source: "MBV",
+			source: car.owner === "Client" ? "Cliente" : "MBV",
 			brandName: car.brand?.name || "N/A",
 			modelName: car.carModel?.name || "N/A",
 		}));
@@ -269,7 +269,10 @@ const AccountingReportPage = () => {
 															? "Disponible"
 															: car.availability === "Sold"
 																? "Vendido"
-																: car.availability}
+																: getDetailsTranslation(
+																		"availability",
+																		car.availability,
+																	)}
 													</Badge>
 												</td>
 											</tr>

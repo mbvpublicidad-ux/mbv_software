@@ -15,6 +15,7 @@ import {
 	BsCurrencyDollar,
 	BsBoxArrowRight,
 	BsCalculator,
+	BsPlusCircle,
 } from "react-icons/bs";
 
 const menuItems = [
@@ -61,6 +62,7 @@ const menuItems = [
 		icon: BsReceipt,
 		label: "Pagos de Clientes",
 	},
+	{ to: "/admin/incomes", icon: BsPlusCircle, label: "Ingresos Generales" },
 	{
 		divider: true,
 	},

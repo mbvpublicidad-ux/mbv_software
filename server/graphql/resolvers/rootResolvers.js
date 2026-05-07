@@ -11,6 +11,7 @@ import clientPaymentResolvers from "./clientPaymentResolvers.js";
 import exchangeRateResolvers from "./exchangeRateResolvers.js";
 import companyBalanceResolvers from "./companyBalanceResolvers.js";
 import carEstimateResolvers from "./carEstimateResolvers.js";
+import generalIncomeResolvers from "./generalIncomeResolvers.js";
 
 const resolvers = mergeResolvers([
 	userResolvers,
@@ -24,6 +25,7 @@ const resolvers = mergeResolvers([
 	exchangeRateResolvers,
 	companyBalanceResolvers,
 	carEstimateResolvers,
+	generalIncomeResolvers,
 ]);
 
 export default resolvers;
