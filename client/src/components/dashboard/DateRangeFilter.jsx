@@ -23,22 +23,24 @@ const DateRangeFilter = ({ onFilterChange }) => {
 	};
 
 	return (
-		<div className="flex items-center gap-2">
-			<Input
-				type="date"
-				size="sm"
-				value={startDate}
-				onChange={(e) => setStartDate(e.target.value)}
-				className="w-40"
-			/>
-			<span className="text-first/30 text-sm">a</span>
-			<Input
-				type="date"
-				size="sm"
-				value={endDate}
-				onChange={(e) => setEndDate(e.target.value)}
-				className="w-40"
-			/>
+		<div className="flex flex-col text-center py-6 gap-2 max-w-50 items-center">
+			<div className="flex gap-2 items-center">
+				<Input
+					type="date"
+					size="sm"
+					value={startDate}
+					onChange={(e) => setStartDate(e.target.value)}
+					className="w-40"
+				/>
+				<span className="text-first/30 text-sm">a</span>
+				<Input
+					type="date"
+					size="sm"
+					value={endDate}
+					onChange={(e) => setEndDate(e.target.value)}
+					className="w-40"
+				/>
+			</div>
 			<Button
 				variant={isActive ? "primary" : "ghost"}
 				size="sm"

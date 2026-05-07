@@ -31,6 +31,7 @@ import { RECALCULATE_BALANCE } from "../../graphql/mutations/companyBalanceMutat
 
 import Input from "../../components/ui/Input";
 import Button from "../../components/ui/Button";
+
 import { Modal } from "../../components/ui/Modal";
 import { LoadingOverlay } from "../../components/ui/LoadingUi";
 import { formatCRC, formatUSD } from "../../utils/formatters";
@@ -266,13 +267,8 @@ const AdminDashboardPage = () => {
 	return (
 		<div className="min-h-screen pt-6 pb-16">
 			<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-				<div className="mb-8">
-					<h1 className="text-3xl font-bold text-first">
-						Panel Administrativo
-					</h1>
-					<p className="text-first/50 mt-1">Resumen general del negocio</p>
-				</div>
-
+				<h1 className="text-3xl font-bold text-first">Panel Administrativo</h1>
+				<p className="text-first/50 mt-1">Resumen general del negocio</p>
 				{/* Stats Cards */}
 				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
 					{statsCards.map((stat) => (
@@ -321,7 +317,6 @@ const AdminDashboardPage = () => {
 						</div>
 					))}
 				</div>
-
 				{/* Detailed Stats */}
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
 					{/* Availability Stats */}
@@ -426,7 +421,6 @@ const AdminDashboardPage = () => {
 						</div>
 					</div>
 				</div>
-
 				{/* Financial Summary */}
 				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 					{/* Company Balance */}
