@@ -356,7 +356,7 @@ const CompanyValuePage = () => {
 
 				{/* Resumen */}
 				<div id="company-value-report">
-					<div className="grid grid-cols-[1fr_2fr] gap-6 my-6">
+					<div className="grid md:grid-cols-[1fr_2fr] gap-6 my-6">
 						<div className="bg-main rounded-2xl border border-first/10 p-6">
 							<h2 className="text-lg text-center font-semibold text-first mb-4">
 								Resumen
