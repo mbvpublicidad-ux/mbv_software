@@ -28,6 +28,7 @@ const clientPaymentDefs = gql`
 
 	input UpdateClientPaymentInput {
 		amount: Float
+		currency: String
 		paymentDate: String
 		paymentMethod: String
 		pendingBalance: Float

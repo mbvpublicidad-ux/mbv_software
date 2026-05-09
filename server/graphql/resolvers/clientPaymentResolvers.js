@@ -97,9 +97,16 @@ const clientPaymentResolvers = {
 			}
 
 			if (totalPaid >= car.publishedPriceCRC && car.availability !== "Sold") {
+				// Eliminar imágenes de Cloudinary
+				if (car.images && car.images.length > 0) {
+					const { deleteImages } = await import("../../config/cloudinary.js");
+					await deleteImages(car.images);
+				}
+
 				car.availability = "Sold";
 				car.finalSalePriceCRC = totalPaid;
 				car.saleDate = new Date().toISOString();
+				car.images = [];
 				await car.save();
 			}
 
