@@ -106,7 +106,7 @@ const companyBalanceResolvers = {
 			let totalClientPaymentsCRC = 0;
 			let totalClientPaymentsUSD = 0;
 			for (const p of clientPayments) {
-				if (soldCarIds.includes(p.car.toString())) continue;
+				if (!p.car || soldCarIds.includes(p.car.toString())) continue;
 				if (p.currency === "USD") {
 					totalClientPaymentsUSD += p.amount;
 				} else {
