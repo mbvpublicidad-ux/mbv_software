@@ -24,7 +24,7 @@ const carResolvers = {
 				page = 1,
 				limit = 12,
 				filters = {},
-				sortBy = "creationDate",
+				sortBy = "_id",
 				sortOrder = "desc",
 			},
 			{ user },
@@ -37,6 +37,7 @@ const carResolvers = {
 
 			const sortOptions = {};
 			sortOptions[sortBy] = sortOrder === "asc" ? 1 : -1;
+			sortOptions._id = sortOrder === "asc" ? 1 : -1;
 
 			const totalCount = await Car.countDocuments(query);
 			const totalPages = Math.ceil(totalCount / limit);
@@ -46,7 +47,7 @@ const carResolvers = {
 				.populate("carModel")
 				.populate("assignedClient")
 				.populate("expenses")
-				.sort(sortOptions)
+				.sort({ logisticStatus: 1 })
 				.skip((page - 1) * limit)
 				.limit(limit);
 
@@ -76,7 +77,7 @@ const carResolvers = {
 				page = 1,
 				limit = 12,
 				filters = {},
-				sortBy = "creationDate",
+				sortBy = "_id",
 				sortOrder = "desc",
 			},
 		) => {
@@ -88,6 +89,7 @@ const carResolvers = {
 
 			const sortOptions = {};
 			sortOptions[sortBy] = sortOrder === "asc" ? 1 : -1;
+			sortOptions._id = sortOrder === "asc" ? 1 : -1;
 
 			const totalCount = await Car.countDocuments(query);
 			const totalPages = Math.ceil(totalCount / limit);
@@ -95,7 +97,7 @@ const carResolvers = {
 			const cars = await Car.find(query)
 				.populate("brand")
 				.populate("carModel")
-				.sort(sortOptions)
+				.sort({ logisticStatus: 1 })
 				.skip((page - 1) * limit)
 				.limit(limit);
 

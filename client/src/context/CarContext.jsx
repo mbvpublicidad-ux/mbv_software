@@ -16,8 +16,8 @@ export const CarProvider = ({ children }) => {
 	const [filters, setFilters] = useState({});
 	const [pagination, setPagination] = useState({ page: 1, limit: 12 });
 	const [sorting, setSorting] = useState({
-		sortBy: "purchaseDate",
-		sortOrder: "desc",
+		sortBy: "creationDate",
+		sortOrder: "asc",
 	});
 
 	// Public cars query
