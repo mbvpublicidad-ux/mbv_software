@@ -202,20 +202,22 @@ const CarDetail = () => {
 						</div>
 
 						{/* Profit */}
-						{car.profitCRC !== null && car.profitCRC !== undefined && (
-							<div
-								className={`p-4 rounded-xl ${car.profitCRC >= 0 ? "bg-success/5" : "bg-error/5"}`}
-							>
-								<p className="text-center text-sm text-first/40">
-									{car.profitCRC >= 0 ? "Ganancia" : "Perdida"}
-								</p>
-								<p
-									className={`text-xl text-center font-bold ${car.profitCRC >= 0 ? "text-success" : "text-error"}`}
+						{car.profitCRC !== null &&
+							car.profitCRC !== undefined &&
+							isAdmin && (
+								<div
+									className={`p-4 rounded-xl ${car.profitCRC >= 0 ? "bg-success/5" : "bg-error/5"}`}
 								>
-									{formatCRC(car.profitCRC)}
-								</p>
-							</div>
-						)}
+									<p className="text-center text-sm text-first/40">
+										{car.profitCRC >= 0 ? "Ganancia" : "Perdida"}
+									</p>
+									<p
+										className={`text-xl text-center font-bold ${car.profitCRC >= 0 ? "text-success" : "text-error"}`}
+									>
+										{formatCRC(car.profitCRC)}
+									</p>
+								</div>
+							)}
 
 						{/* Actions */}
 						<div className="flex gap-2">
