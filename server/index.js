@@ -22,7 +22,7 @@ import { clearRefreshTokenCookieOptions } from "./config/cookieConfig.js";
 
 const app = express();
 const httpServer = http.createServer(app);
-const serverPort = process.env.PORT || process.env.SERVER_PORT || 4000;
+const serverPort = process.env.SERVER_PORT || 4000;
 
 if (!process.env.MONGO_URI) {
 	console.error("DB Uri is not defined");
@@ -32,6 +32,7 @@ if (!process.env.MONGO_URI) {
 const whitelist = [
 	"http://localhost:5173",
 	"http://localhost:4000",
+	"http://localhost:4000/graphql",
 	"https://importacionesmbv.com",
 	"https://www.importacionesmbv.com",
 ];
@@ -193,7 +194,7 @@ app.get("/health", (req, res) => {
 		);
 
 		await new Promise((resolve) => {
-			httpServer.listen({ port: serverPort, host: "0.0.0.0" }, resolve);
+			httpServer.listen({ port: serverPort }, resolve);
 		});
 
 		console.log(`🚀 Server running on port: ${serverPort}`);
